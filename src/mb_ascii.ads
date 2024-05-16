@@ -36,6 +36,8 @@
 -- for serial data access.
 -- When you create the object, it creates a byte buffer store the incomming
 -- byte and un pack them ti binary format:
+-- The Ascii byte buffer is larger than ID_PDU_Length because the Ascii packed
+-- use 2 chars per byte + start byte + LRS (1 byte, 2 chars) + CR + LF
 
 with MB_Types;
 with MB_Transport;
@@ -46,6 +48,12 @@ package MB_Ascii is
 
    Msg_Max_Length : constant Integer := 1 + (MB_Transport.ID_PDU_Length+1) * 2 + 2;
 
+   ---------------------------------------------------------------------------
+   -- Description: Modbus ASCII Transoport object
+   -- Parameters:
+   --   - Recv   : Call back for receive data
+   --   - Send   : Call back for send data
+   ---------------------------------------------------------------------------
    type MB_Ascii_Type(Recv : MB_Serial_CB.Recv_CB;
                       Send : MB_Serial_CB.Send_CB) is
      new MB_Transport.MB_Transport_Type with record
@@ -54,12 +62,24 @@ package MB_Ascii is
       Buffer : MB_Types.Byte_Array(1 .. Msg_Max_Length) := (others => 0);
    end record;
 
+   ---------------------------------------------------------------------------
+   -- Description: Sends the specified buffer (binary) over the Modbus ASCII
+   -- transport.
+   -- Parameters:
+   --   - Self   : The Modbus ASCII transport object.
+   --   - Buffer : The buffer containing the data to send. It can be the
+   --              either the same buffer in the Self.Buffer, or other buffer.
+   --              If it is the Self.Buffer, note that the data will be
+   --              destroyed.
+   --   - Length : The length of the data to send.
+   ---------------------------------------------------------------------------
    overriding
    procedure Send (Self : in out MB_Ascii_Type ;
                    Buffer : MB_Types.Byte_Array ;
                    Length : MB_Transport.Msg_Length);
 
    overriding
-   function Recv (Self : in out MB_Ascii_Type ; Timeout : Time_Span) return MB_Transport.Msg_Length;
+   function Recv (Self : in out MB_Ascii_Type ;
+                  Timeout : Time_Span) return MB_Transport.Msg_Length;
 
 end MB_Ascii;
