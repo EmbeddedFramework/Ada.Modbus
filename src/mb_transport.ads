@@ -31,12 +31,19 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+-- This file defines the interface for all low-layer formats such as
+-- Modbus ASCII, RTU, and TCP.
+-- All the interface modules extend MB_Transport_Type by adding necessary
+-- fields and implementing Send and Recv procedures.
+
 with MB_Types;
 with Ada.Real_Time; use Ada.Real_Time;
 
 package MB_Transport is
 
    Msg_Max_Length : constant Integer := 253;
+
+   -- Use the following type to manage index securely in the modbus buffers
    subtype Msg_Length is Integer range 0 .. Msg_Max_Length;
 
    type MB_Transport_Type is abstract tagged null record;
