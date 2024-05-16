@@ -35,16 +35,18 @@
 -- Modbus ASCII, RTU, and TCP.
 -- All the interface modules extend MB_Transport_Type by adding necessary
 -- fields and implementing Send and Recv procedures.
+-- The buffers always start with ID (1 byte) + PDU (up to 253 bytes)
 
 with MB_Types;
 with Ada.Real_Time; use Ada.Real_Time;
 
 package MB_Transport is
 
-   Msg_Max_Length : constant Integer := 253;
+   PDU_Length : constant Integer := 253;
+   ID_PDU_Length : constant Integer := 1 + PDU_Length;
 
    -- Use the following type to manage index securely in the modbus buffers
-   subtype Msg_Length is Integer range 0 .. Msg_Max_Length;
+   subtype Msg_Length is Integer range 0 .. ID_PDU_Length;
 
    type MB_Transport_Type is abstract tagged null record;
 
@@ -52,6 +54,7 @@ package MB_Transport is
                    Buffer : MB_Types.Byte_Array ;
                    Length : MB_Transport.Msg_Length) is abstract;
 
-   function Recv (Self : in out MB_Transport_Type ; Timeout : Time_Span) return Msg_Length is abstract;
+   function Recv (Self : in out MB_Transport_Type ; Timeout : Time_Span)
+                  return Msg_Length is abstract;
 
 end MB_Transport;

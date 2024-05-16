@@ -31,6 +31,12 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+-- This file define the Modbus Ascii functions and record.
+-- You will need create a MB_Ascii_Type object and provide the call backs
+-- for serial data access.
+-- When you create the object, it creates a byte buffer store the incomming
+-- byte and un pack them ti binary format:
+
 with MB_Types;
 with MB_Transport;
 with MB_Serial_CB; use MB_Serial_CB;
@@ -38,7 +44,7 @@ with Ada.Real_Time; use Ada.Real_Time;
 
 package MB_Ascii is
 
-   Msg_Max_Length : constant Integer := 1 + (MB_Transport.Msg_Max_Length+1) * 2 + 2;
+   Msg_Max_Length : constant Integer := 1 + (MB_Transport.ID_PDU_Length+1) * 2 + 2;
 
    type MB_Ascii_Type(Recv : MB_Serial_CB.Recv_CB;
                       Send : MB_Serial_CB.Send_CB) is
