@@ -36,6 +36,8 @@
 -- All the interface modules extend MB_Transport_Type by adding necessary
 -- fields and implementing Send and Recv procedures.
 -- The buffers always start with ID (1 byte) + PDU (up to 253 bytes)
+-- Each type derived from MB_Transport_Type must define the buffer size
+-- to ensure it can store all bytes for that type of transport.
 
 with MB_Types;
 with Ada.Real_Time; use Ada.Real_Time;
@@ -48,7 +50,9 @@ package MB_Transport is
    -- Use the following type to manage index securely in the modbus buffers
    subtype Msg_Length is Integer range 0 .. ID_PDU_Length;
 
-   type MB_Transport_Type is abstract tagged null record;
+   type MB_Transport_Type (Buffer_Size : Positive) is abstract tagged record
+      Buffer : MB_Types.Byte_Array (1 .. Buffer_Size);
+   end record;
 
    procedure Send (Self : in out MB_Transport_Type ;
                    Buffer : MB_Types.Byte_Array ;

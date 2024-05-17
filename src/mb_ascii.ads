@@ -56,10 +56,9 @@ package MB_Ascii is
    ---------------------------------------------------------------------------
    type MB_Ascii_Type(Recv : MB_Serial_CB.Recv_CB;
                       Send : MB_Serial_CB.Send_CB) is
-     new MB_Transport.MB_Transport_Type with record
+     new MB_Transport.MB_Transport_Type (Msg_Max_Length) with record
       Serial_Recv : MB_Serial_CB.Recv_CB := Recv;
       Serial_Send : MB_Serial_CB.Send_CB := Send;
-      Buffer : MB_Types.Byte_Array(1 .. Msg_Max_Length) := (others => 0);
    end record;
 
    ---------------------------------------------------------------------------
