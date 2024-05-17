@@ -65,12 +65,12 @@ package body Mb_Ascii_Send_Test is
    Buffer_Asc : MB_Types.Byte_Array
      (1 .. (1 + (Buffer_Bin'Length + 1) * 2 + 2));
 
-   Send_Count : MB_Transport.Msg_Length := 1;
+   Send_Count : MB_Transport.Msg_Length := 0;
 
    procedure SSend (Data : in Byte) is
    begin
-      Buffer_Asc (Send_Count) := Data;
       Send_Count := Send_Count + 1;
+      Buffer_Asc (Send_Count) := Data;
    end SSend;
 
    function SRecv (Data : out Byte; Timeout : in Duration) return Boolean is
@@ -91,6 +91,10 @@ package body Mb_Ascii_Send_Test is
       for I in 1 .. Buffer_Asc_Exp'Length loop
          Assert (Buffer_Asc (I) = Buffer_Asc_Exp (I),
                  "Incorrect data sent at" & I'Image);
+
+         Assert (Send_Count = Buffer_Asc_Exp'Length,
+                 "Incorrect total bytes sent");
+
       end loop;
 
    end Run_Test;
