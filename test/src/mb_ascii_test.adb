@@ -35,7 +35,7 @@
 with AUnit.Assertions; use AUnit.Assertions;
 with MB_Ascii;
 with MB_Transport;
-with Ada.Real_Time; use Ada.Real_Time;
+with Interfaces; use Interfaces;
 
 package body Mb_Ascii_Test is
 
@@ -45,9 +45,32 @@ package body Mb_Ascii_Test is
       return AUnit.Format ("Test Modbus ASCII package");
    end Name;
 
+   Buffer_Bin : constant MB_Types.Byte_Array :=
+     (1 => 16#11#, 2 => 16#22#, 3 => 16#33#, 4 => 16#44#,
+      5 => 16#AA#, 6 => 16#BB#, 7 => 16#1A#, 8 => 16#E2#);
+
+   Buffer_Asc_Exp : constant MB_Types.Byte_Array :=
+     (1 => Character'Pos (':'),
+      2 => Character'Pos ('1'), 3 => Character'Pos ('1'),
+      4 => Character'Pos ('2'), 5 => Character'Pos ('2'),
+      6 => Character'Pos ('3'), 7 => Character'Pos ('3'),
+      8 => Character'Pos ('4'), 9 => Character'Pos ('4'),
+      10 => Character'Pos ('A'), 11 => Character'Pos ('A'),
+      12 => Character'Pos ('B'), 13 => Character'Pos ('B'),
+      14 => Character'Pos ('1'), 15 => Character'Pos ('A'),
+      16 => Character'Pos ('E'), 17 => Character'Pos ('2'),
+      18 => Character'Pos ('F'), 19 => Character'Pos ('5'),
+      20 => 13, 21 => 10);
+
+   Buffer_Asc : MB_Types.Byte_Array
+     (1 .. (1 + (Buffer_Bin'Length + 1) * 2 + 2));
+
+   Send_Count : MB_Transport.Msg_Length := 1;
+
    procedure SSend (Data : in Byte) is
    begin
-      null;
+      Buffer_Asc (Send_Count) := Data;
+      Send_Count := Send_Count + 1;
    end SSend;
 
    function SRecv (Data : out Byte; Timeout : in Duration) return Boolean is
@@ -59,16 +82,16 @@ package body Mb_Ascii_Test is
 
    My_MB_Ascii : MB_Ascii.MB_Ascii_Type (SRecv'Access, SSend'Access);
 
-   Ret : MB_Transport.Msg_Length := 0;
-
    procedure Run_Test (T : in out Test) is
       pragma Unreferenced (T);
-
    begin
 
-      Ret := MB_Ascii.Recv (My_MB_Ascii, Milliseconds (100));
+      MB_Ascii.Send (My_MB_Ascii, Buffer_Bin, Buffer_Bin'Length);
 
-      Assert (Ret = 0, "Incorrect return length");
+      for I in 1 .. Buffer_Asc_Exp'Length loop
+         Assert (Buffer_Asc (I) = Buffer_Asc_Exp (I),
+                 "Incorrect data sent at" & I'Image);
+      end loop;
 
    end Run_Test;
 
