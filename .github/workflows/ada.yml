@@ -19,6 +19,15 @@ jobs:
       run: >
         sudo apt-get update &&
         sudo apt-get install gnat gprbuild
+        sudo apt install sphinx
+        pip install sphinx_rtd_theme
+        pip install --upgrade Pygments
 
     - name: Build
       run: gprbuild -j0 -p
+
+    - name: Run Test
+      run: >
+        cd test
+        make
+        ./obj/test_modbus
