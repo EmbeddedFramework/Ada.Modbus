@@ -107,11 +107,11 @@ package body MB_Ascii is
       pragma Unreferenced (Timeout);
       Result : MB_Types.Byte_Array (1 .. 0);
    begin
-      Self.Buffer (1) := 16#12#;
-      Self.Buffer (2) := 16#34#;
-      Self.Buffer (3) := 16#AB#;
-      Self.Buffer (4) := 16#CD#;
-      return 4;
+      -- Self.Buffer (1) := 16#12#;
+      -- Self.Buffer (2) := 16#34#;
+      -- Self.Buffer (3) := 16#AB#;
+      -- Self.Buffer (4) := 16#CD#;
+      return 0;
    end Recv;
 
 end MB_Ascii;
