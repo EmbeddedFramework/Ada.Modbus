@@ -23,6 +23,13 @@ jobs:
         pip install sphinx_rtd_theme
         pip install --upgrade Pygments
 
+    - name: Download and extract aunit
+      run: |
+        wget https://github.com/AdaCore/aunit/archive/refs/tags/v24.0.0.zip
+        unzip v24.0.0.zip -d aunit
+        cd auint
+        make install
+    
     - name: Build
       run: gprbuild -j0 -p
 
