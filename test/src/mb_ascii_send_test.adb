@@ -37,7 +37,7 @@ with MB_Ascii;
 with MB_Transport;
 with Interfaces; use Interfaces;
 
-package body Mb_Ascii_Test is
+package body Mb_Ascii_Send_Test is
 
    function Name (T : Test) return AUnit.Message_String is
       pragma Unreferenced (T);
@@ -95,4 +95,4 @@ package body Mb_Ascii_Test is
 
    end Run_Test;
 
-end Mb_Ascii_Test;
+end Mb_Ascii_Send_Test;

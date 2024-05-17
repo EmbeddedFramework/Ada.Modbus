@@ -33,14 +33,14 @@
 ------------------------------------------------------------------------------
 
 with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
-with Mb_Ascii_Test;
+with Mb_Ascii_Send_Test;
 
 package body Modbus_Suite is
 
    function Suite return Access_Test_Suite is
       Ret : constant Access_Test_Suite := new Test_Suite;
    begin
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Test.Test));
+      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
       return Ret;
    end Suite;
 

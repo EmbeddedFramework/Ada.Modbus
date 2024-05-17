@@ -36,7 +36,7 @@ with AUnit;
 with AUnit.Simple_Test_Cases;
 with MB_Types; use MB_Types;
 
-package Mb_Ascii_Test is
+package Mb_Ascii_Send_Test is
 
    type Test is new AUnit.Simple_Test_Cases.Test_Case with null record;
 
@@ -48,4 +48,4 @@ private
    procedure SSend (Data : in Byte);
    function SRecv (Data : out Byte; Timeout : in Duration) return Boolean;
 
-end Mb_Ascii_Test;
+end Mb_Ascii_Send_Test;
