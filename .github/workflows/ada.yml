@@ -28,6 +28,7 @@ jobs:
         wget https://github.com/AdaCore/aunit/archive/refs/tags/v24.0.0.zip
         unzip v24.0.0.zip -d aunit
         cd aunit/aunit-24.0.0/
+        make
         sudo make install
     
     - name: Build
