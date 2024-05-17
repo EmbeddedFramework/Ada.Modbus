@@ -75,12 +75,16 @@ package body MB_Ascii is
 
    begin
 
-      Self.Buffer (Length + 1) := Calc_LRC(Buffer, Ascii_Length);
+      for I in 1 .. Length loop
+         Self.Buffer(I) := Buffer(I);
+      end loop;
+
+      Self.Buffer (Length + 1) := Calc_LRC(Self.Buffer, Ascii_Length);
       Ascii_Length := Ascii_Length + 1;
 
       for I in reverse 1 .. Ascii_Length loop
-         High := Nibble(Buffer(I) / 16);
-         Low := Nibble(Buffer(I) mod 16);
+         High := Nibble(Self.Buffer(I) / 16);
+         Low := Nibble(Self.Buffer(I) mod 16);
 
          Self.Buffer (I * 2 + 0) := Nibble_To_Char(High);
          Self.Buffer (I * 2 + 1) := Nibble_To_Char(Low);
