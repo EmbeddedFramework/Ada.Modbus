@@ -103,8 +103,15 @@ package body MB_Ascii is
          Self.Serial_Send(Self.Buffer(I));
       end loop;
 
-
    end Send;
+
+   function checkLRC (Buffer : MB_Types.Byte_Array ;
+                      Length : MB_Transport.Msg_Length) return Boolean is
+      Lrc : MB_Types.Byte;
+   begin
+      Lrc := Calc_LRC (Buffer, Length - 1);
+      return Lrc = Buffer(Length-1);
+   end checkLRC;
 
    overriding
    function Recv (Self :  in out MB_Ascii_Type ; Timeout : Time_Span) return MB_Transport.Msg_Length is
