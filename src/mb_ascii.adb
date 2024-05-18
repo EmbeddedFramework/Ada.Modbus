@@ -60,6 +60,14 @@ package body MB_Ascii is
       return -Result;
    end Calc_LRC;
 
+   function Check_LRC (Buffer :  Byte_Array ;
+                      Length : MB_Transport.Msg_Length) return Boolean is
+      Lrc :  Byte;
+   begin
+      Lrc := Calc_LRC (Buffer, Length - 1);
+      return Lrc = Buffer(Length);
+   end Check_LRC;
+
    function Nibble_To_Char(N : Nibble) return  Byte is
    begin
       if N < 10 then
@@ -109,14 +117,6 @@ package body MB_Ascii is
 
    end Send;
 
-   function Check_LRC (Buffer :  Byte_Array ;
-                      Length : MB_Transport.Msg_Length) return Boolean is
-      Lrc :  Byte;
-   begin
-      Lrc := Calc_LRC (Buffer, Length - 1);
-      return Lrc = Buffer(Length-1);
-   end Check_LRC;
-
    function Wait_For_Byte (Self : in out MB_Ascii_Type;
                            B :  Byte;
                            Exit_On_Diff : Boolean;
@@ -149,7 +149,7 @@ package body MB_Ascii is
 
    function Is_Valid_Byte(B :  Byte) return Boolean is
    begin
-      if (B >=  Byte(Character'Pos('1')) and B <=  Byte(Character'Pos('2'))) or
+      if (B >=  Byte(Character'Pos('1')) and B <=  Byte(Character'Pos('9'))) or
          (B >=  Byte(Character'Pos('A')) and B <=  Byte(Character'Pos('F'))) then
          return True;
       else
@@ -159,7 +159,7 @@ package body MB_Ascii is
 
    function Nibble_Value(B :  Byte) return Nibble is
    begin
-      if B >= Byte(Character'Pos('1')) and B <= Byte(Character'Pos('2')) then
+      if B >= Byte(Character'Pos('1')) and B <= Byte(Character'Pos('9')) then
          return B - Byte(Character'Pos('0'));
       elsif B >= Byte(Character'Pos('A')) and B <= Byte(Character'Pos('F')) then
          return B - Byte(Character'Pos('A')) + 10;
@@ -251,14 +251,19 @@ package body MB_Ascii is
 
       -- ASCII to BIN
 
+      Index := Index / 2;
 
+      for I in 1 .. Index loop
+         Self.Buffer (I) := Combine_Bytes(Self.Buffer (I * 2 - 1),
+                                          Self.Buffer (I * 2));
+      end loop;
 
+      if Check_LRC(Self.Buffer, Index) then
+         return Index - 1;
+      else
+         return 0;
+      end if;
 
-      -- Self.Buffer (1) := 16#12#;
-      -- Self.Buffer (2) := 16#34#;
-      -- Self.Buffer (3) := 16#AB#;
-      -- Self.Buffer (4) := 16#CD#;
-      return 0;
    end Recv;
 
 end MB_Ascii;
