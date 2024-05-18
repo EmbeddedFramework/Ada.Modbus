@@ -31,11 +31,14 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+with Ada.Real_Time;
 with MB_Types; use MB_Types;
 
 package MB_Serial_CB is
 
-   type Recv_CB is access function (Data : out Byte ; Timeout : in Duration) return Boolean;
+   type Recv_CB is access function (Data : out Byte ;
+                                    Timeout : in Ada.Real_Time.Time_Span)
+                                    return Boolean;
 
    type Send_CB is access procedure (Data : in Byte);
 
