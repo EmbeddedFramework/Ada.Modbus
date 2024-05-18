@@ -45,6 +45,9 @@ package body MB_Ascii is
    subtype Msg_Length is Integer range 0 .. MB_Ascii.Msg_Max_Length;
    subtype Nibble is Interfaces.Unsigned_8 range 0 .. 15;
 
+   -- ':' + ID + FNC_COD + LRC + CR + LF
+   Min_Msg_Length : constant Msg_Length := 1 + 2 + 2 + 2 + 1 + 1;
+
    function Calc_LRC (Buffer : MB_Types.Byte_Array ;
                       Length : MB_Transport.Msg_Length) return MB_Types.Byte is
 
@@ -105,19 +108,104 @@ package body MB_Ascii is
 
    end Send;
 
-   function checkLRC (Buffer : MB_Types.Byte_Array ;
+   function Check_LRC (Buffer : MB_Types.Byte_Array ;
                       Length : MB_Transport.Msg_Length) return Boolean is
       Lrc : MB_Types.Byte;
    begin
       Lrc := Calc_LRC (Buffer, Length - 1);
       return Lrc = Buffer(Length-1);
-   end checkLRC;
+   end Check_LRC;
+
+   function Wait_For_Byte (Self : in out MB_Ascii_Type;
+                           Byte : MB_Types.Byte;
+                           Exit_On_Diff : Boolean;
+                           Dead_Line : Time) return Boolean is
+      Byte_Rec : MB_Types.Byte;
+      Ret : Boolean;
+      Timeout : Time_Span;
+   begin
+      loop
+         Timeout := Dead_Line - Clock;
+
+         if Timeout <= Time_Span_Zero then
+            return False;
+         end if;
+
+         Ret := Self.Serial_Recv (Byte_Rec, Timeout);
+         if Ret = True then
+            if Byte_Rec = Byte then
+               return True;
+            else
+               if Exit_On_Diff then
+                  return False;
+               end if;
+            end if;
+         else
+            return False;
+         end if;
+      end loop;
+   end Wait_For_Byte;
+
 
    overriding
-   function Recv (Self :  in out MB_Ascii_Type ; Timeout : Time_Span) return MB_Transport.Msg_Length is
-      pragma Unreferenced (Timeout);
-      Result : MB_Types.Byte_Array (1 .. 0);
+   function Recv (Self :  in out MB_Ascii_Type ;
+                  Timeout : Time_Span) return MB_Transport.Msg_Length is
+      Start_Time : Time := Clock;
+      Time_Remaining : Time_Span := Timeout;
+      Dead_Line : Time := Timeout + Clock;
+      Ret : Boolean;
+      Index : Msg_Length := 0;
+      Byte_Rec : MB_Types.Byte;
    begin
+
+      if Wait_For_Byte (Self, Character'Pos(':'), False, Dead_Line) = False
+      then
+         return 0;
+      end if;
+
+      loop
+
+         Time_Remaining := Dead_Line - Clock;
+
+         if Time_Remaining <= Time_Span_Zero then
+            return 0;
+         end if;
+
+         Ret := Self.Serial_Recv (Byte_Rec, Time_Remaining);
+
+         if Ret = False then
+            return 0;
+         end if;
+
+         case Byte_Rec is
+            when Character'Pos(':') =>
+               Index := 0;
+
+            when End2_Byte =>
+               Index := 0;
+
+            when End1_Byte =>
+               if Index >= Min_Msg_Length then
+                  exit;
+               else
+                  Index := 0;
+               end if;
+
+            when others =>
+               Index := Index + 1;
+               Self.Buffer (Index) := Byte_Rec;
+
+         end case;
+
+      end loop;
+
+      if Wait_For_Byte (Self, End2_Byte, True, Dead_Line) = False then
+         return 0;
+      end if;
+
+
+
+
       -- Self.Buffer (1) := 16#12#;
       -- Self.Buffer (2) := 16#34#;
       -- Self.Buffer (3) := 16#AB#;
