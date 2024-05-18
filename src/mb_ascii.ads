@@ -77,6 +77,14 @@ package MB_Ascii is
                    Buffer : MB_Types.Byte_Array ;
                    Length : MB_Transport.Msg_Length);
 
+   ---------------------------------------------------------------------------
+   -- Description: Receives a Modbus ASCII message
+   -- Parameters:
+   --   - Self   : The Modbus ASCII transport object.
+   --   - Timeout: The total time to wait for a correct Modbus ASCII message.
+   -- Return: The length of reception (in binary) (ID+PDU). The messaje is
+   --         stored in Self.Buffer.
+   ---------------------------------------------------------------------------
    overriding
    function Recv (Self : in out MB_Ascii_Type ;
                   Timeout : Time_Span) return MB_Transport.Msg_Length;
