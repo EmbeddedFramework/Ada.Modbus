@@ -35,6 +35,7 @@ with MB_Transport;
 with Ada.Real_Time; use Ada.Real_Time;
 with Interfaces; use Interfaces;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
+with MB_Types; use MB_Types;
 
 package body MB_Ascii is
 
@@ -146,6 +147,40 @@ package body MB_Ascii is
       end loop;
    end Wait_For_Byte;
 
+   function Is_Valid_Byte(B : MB_Types.Byte) return Boolean is
+   begin
+      if (B >= MB_Types.Byte(Character'Pos('1')) and B <= MB_Types.Byte(Character'Pos('2'))) or
+         (B >= MB_Types.Byte(Character'Pos('A')) and B <= MB_Types.Byte(Character'Pos('F'))) then
+         return True;
+      else
+         return False;
+      end if;
+   end Is_Valid_Byte;
+
+   function Nibble_Value(B : MB_Types.Byte) return Nibble is
+   begin
+      if B >= Byte(Character'Pos('1')) and B <= Byte(Character'Pos('2')) then
+         return B - Byte(Character'Pos('0'));
+      elsif B >= Byte(Character'Pos('A')) and B <= Byte(Character'Pos('F')) then
+         return B - Byte(Character'Pos('A')) + 10;
+      else
+         raise Constraint_Error with "Invalid byte value";
+      end if;
+   end Nibble_Value;
+
+   function Combine_Bytes(High, Low : MB_Types.Byte) return MB_Types.Byte is
+      High_Nibble : MB_Types.Byte;
+      Low_Nibble  : MB_Types.Byte;
+   begin
+      if not Is_Valid_Byte(High) or not Is_Valid_Byte(Low) then
+         raise Constraint_Error with "Invalid byte value";
+      end if;
+
+      High_Nibble := Nibble_Value(High);
+      Low_Nibble  := Nibble_Value(Low);
+
+      return (High_Nibble * 16) + Low_Nibble;
+   end Combine_Bytes;
 
    overriding
    function Recv (Self :  in out MB_Ascii_Type ;
@@ -158,11 +193,13 @@ package body MB_Ascii is
       Byte_Rec : MB_Types.Byte;
    begin
 
+      -- Wait for ':'
       if Wait_For_Byte (Self, Character'Pos(':'), False, Dead_Line) = False
       then
          return 0;
       end if;
 
+      -- Reception
       loop
 
          Time_Remaining := Dead_Line - Clock;
@@ -192,16 +229,27 @@ package body MB_Ascii is
                end if;
 
             when others =>
-               Index := Index + 1;
-               Self.Buffer (Index) := Byte_Rec;
+               if Is_Valid_Byte(Byte_Rec) then
+                  Index := Index + 1;
+                  Self.Buffer (Index) := Byte_Rec;
+               else
+                  Index := 0;
+               end if;
 
          end case;
 
       end loop;
 
+      -- Wait for 'LF'
       if Wait_For_Byte (Self, End2_Byte, True, Dead_Line) = False then
          return 0;
       end if;
+
+      if Index mod 2 = 1 then
+         return 0;
+      end if;
+
+      -- ASCII to BIN
 
 
 
