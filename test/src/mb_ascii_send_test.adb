@@ -42,7 +42,7 @@ package body Mb_Ascii_Send_Test is
    function Name (T : Test) return AUnit.Message_String is
       pragma Unreferenced (T);
    begin
-      return AUnit.Format ("Test Modbus ASCII package");
+      return AUnit.Format ("Test Modbus ASCII Send");
    end Name;
 
    Buffer_Bin : constant MB_Types.Byte_Array :=
