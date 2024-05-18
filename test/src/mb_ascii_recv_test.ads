@@ -32,18 +32,20 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
-with Mb_Ascii_Send_Test;
-with Mb_Ascii_Recv_Test;
+with AUnit;
+with AUnit.Simple_Test_Cases;
+with MB_Types; use MB_Types;
 
-package body Modbus_Suite is
+package Mb_Ascii_Recv_Test is
 
-   function Suite return Access_Test_Suite is
-      Ret : constant Access_Test_Suite := new Test_Suite;
-   begin
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Recv_Test.Test));
-      return Ret;
-   end Suite;
+   type Test is new AUnit.Simple_Test_Cases.Test_Case with null record;
 
-end Modbus_Suite;
+   function Name (T : Test) return AUnit.Message_String;
+
+   procedure Run_Test (T : in out Test);
+
+private
+   procedure SSend (Data : in Byte);
+   function SRecv (Data : out Byte; Timeout : in Duration) return Boolean;
+
+end Mb_Ascii_Recv_Test;

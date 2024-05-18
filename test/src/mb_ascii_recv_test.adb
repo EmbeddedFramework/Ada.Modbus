@@ -32,18 +32,64 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
-with Mb_Ascii_Send_Test;
-with Mb_Ascii_Recv_Test;
+with AUnit.Assertions; use AUnit.Assertions;
+with MB_Ascii;
+with MB_Transport;
+with Ada.Real_Time; use Ada.Real_Time;
 
-package body Modbus_Suite is
+package body Mb_Ascii_Recv_Test is
 
-   function Suite return Access_Test_Suite is
-      Ret : constant Access_Test_Suite := new Test_Suite;
+   function Name (T : Test) return AUnit.Message_String is
+      pragma Unreferenced (T);
    begin
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Recv_Test.Test));
-      return Ret;
-   end Suite;
+      return AUnit.Format ("Test Modbus ASCII Recv");
+   end Name;
 
-end Modbus_Suite;
+   Buffer_Asc : constant MB_Types.Byte_Array :=
+     (1 => Character'Pos (':'),
+      2 => Character'Pos ('1'), 3 => Character'Pos ('1'),
+      4 => Character'Pos ('2'), 5 => Character'Pos ('2'),
+      6 => Character'Pos ('3'), 7 => Character'Pos ('3'),
+      8 => Character'Pos ('4'), 9 => Character'Pos ('4'),
+      10 => Character'Pos ('A'), 11 => Character'Pos ('A'),
+      12 => Character'Pos ('B'), 13 => Character'Pos ('B'),
+      14 => Character'Pos ('1'), 15 => Character'Pos ('A'),
+      16 => Character'Pos ('E'), 17 => Character'Pos ('2'),
+      18 => Character'Pos ('F'), 19 => Character'Pos ('5'),
+      20 => 13, 21 => 10);
+
+   Recv_Index : MB_Transport.Msg_Length := 0;
+
+   procedure SSend (Data : in Byte) is
+      pragma Unreferenced (Data);
+
+   begin
+      null;
+   end SSend;
+
+   function SRecv (Data : out Byte; Timeout : in Duration) return Boolean is
+      pragma Unreferenced (Timeout);
+   begin
+      if Recv_Index = 0 then
+         return False;
+      else
+         Data := Buffer_Asc (Recv_Index);
+         return True;
+      end if;
+
+   end SRecv;
+
+   My_MB_Ascii : MB_Ascii.MB_Ascii_Type (SRecv'Access, SSend'Access);
+
+   procedure Run_Test (T : in out Test) is
+      pragma Unreferenced (T);
+      Ret :  MB_Transport.Msg_Length := 0;
+   begin
+
+      Recv_Index := 0;
+      Ret := MB_Ascii.Recv (My_MB_Ascii, Milliseconds (100));
+      Assert (Ret = 0, "Fail Recv");
+
+   end Run_Test;
+
+end Mb_Ascii_Recv_Test;
