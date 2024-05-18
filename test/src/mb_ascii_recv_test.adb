@@ -35,6 +35,7 @@
 with AUnit.Assertions; use AUnit.Assertions;
 with MB_Ascii;
 with MB_Transport;
+with Interfaces; use Interfaces;
 
 package body Mb_Ascii_Recv_Test is
 
@@ -57,7 +58,11 @@ package body Mb_Ascii_Recv_Test is
       18 => Character'Pos ('F'), 19 => Character'Pos ('5'),
       20 => 13, 21 => 10);
 
-   Recv_Index : MB_Transport.Msg_Length := 0;
+   Buffer_Bin : constant MB_Types.Byte_Array :=
+     (1 => 16#11#, 2 => 16#22#, 3 => 16#33#, 4 => 16#44#,
+      5 => 16#AA#, 6 => 16#BB#, 7 => 16#1A#, 8 => 16#E2#);
+
+   Recv_Index, Max_Index : MB_Transport.Msg_Length := 0;
 
    procedure SSend (Data : in Byte) is
       pragma Unreferenced (Data);
@@ -73,6 +78,11 @@ package body Mb_Ascii_Recv_Test is
          return False;
       else
          Data := Buffer_Asc (Recv_Index);
+         Recv_Index := Recv_Index + 1;
+         if Recv_Index > Max_Index then
+            Recv_Index := Max_Index;
+         end if;
+
          return True;
       end if;
 
@@ -85,9 +95,27 @@ package body Mb_Ascii_Recv_Test is
       Ret :  MB_Transport.Msg_Length := 0;
    begin
 
+      --  TEST: No reception
       Recv_Index := 0;
       Ret := MB_Ascii.Recv (My_MB_Ascii, Milliseconds (100));
       Assert (Ret = 0, "Fail Recv");
+
+      --  TEST: full reception
+      Recv_Index := 1;
+      Max_Index := Buffer_Asc'Length;
+      Ret := MB_Ascii.Recv (My_MB_Ascii, Milliseconds (100));
+      Assert (Ret = 8, "Fail Recv length");
+
+      for I in 1 .. Buffer_Bin'Length loop
+         Assert (Buffer_Bin (I) = My_MB_Ascii.Buffer (I),
+                 "Incorrect data recv at" & I'Image);
+      end loop;
+
+      --  TEST: incomplete reception
+      Recv_Index := 1;
+      Max_Index := Buffer_Asc'Length - 1;
+      Ret := MB_Ascii.Recv (My_MB_Ascii, Milliseconds (100));
+      Assert (Ret = 0, "Fail Recv length");
 
    end Run_Test;
 

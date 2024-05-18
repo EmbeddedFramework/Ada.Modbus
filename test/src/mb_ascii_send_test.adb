@@ -91,11 +91,10 @@ package body Mb_Ascii_Send_Test is
       for I in 1 .. Buffer_Asc_Exp'Length loop
          Assert (Buffer_Asc (I) = Buffer_Asc_Exp (I),
                  "Incorrect data sent at" & I'Image);
-
-         Assert (Send_Count = Buffer_Asc_Exp'Length,
-                 "Incorrect total bytes sent");
-
       end loop;
+
+      Assert (Send_Count = Buffer_Asc_Exp'Length,
+              "Incorrect total bytes sent");
 
    end Run_Test;
 
