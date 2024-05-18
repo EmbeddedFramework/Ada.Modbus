@@ -49,9 +49,15 @@ package body MB_Ascii is
    -- ':' + ID + FNC_COD + LRC + CR + LF
    Min_Msg_Length : constant Msg_Length := 1 + 2 + 2 + 2 + 1 + 1;
 
+   ---------------------------------------------------------------------------
+   -- Description: Returns the LRC (Longitudinal Redundancy Check) of the
+   --              given buffer
+   -- Parameters:
+   --   - Buffer :
+   --   - Length :
+   ---------------------------------------------------------------------------
    function Calc_LRC (Buffer :  Byte_Array ;
                       Length : MB_Transport.Msg_Length) return  Byte is
-
       Result :  Byte := 0;
    begin
       for I in 1 .. Length loop
