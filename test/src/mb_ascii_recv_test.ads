@@ -35,6 +35,7 @@
 with AUnit;
 with AUnit.Simple_Test_Cases;
 with MB_Types; use MB_Types;
+with Ada.Real_Time; use Ada.Real_Time;
 
 package Mb_Ascii_Recv_Test is
 
@@ -46,6 +47,6 @@ package Mb_Ascii_Recv_Test is
 
 private
    procedure SSend (Data : in Byte);
-   function SRecv (Data : out Byte; Timeout : in Duration) return Boolean;
+   function SRecv (Data : out Byte; Timeout : in Time_Span) return Boolean;
 
 end Mb_Ascii_Recv_Test;

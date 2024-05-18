@@ -35,7 +35,6 @@
 with AUnit.Assertions; use AUnit.Assertions;
 with MB_Ascii;
 with MB_Transport;
-with Ada.Real_Time; use Ada.Real_Time;
 
 package body Mb_Ascii_Recv_Test is
 
@@ -67,7 +66,7 @@ package body Mb_Ascii_Recv_Test is
       null;
    end SSend;
 
-   function SRecv (Data : out Byte; Timeout : in Duration) return Boolean is
+   function SRecv (Data : out Byte; Timeout : in Time_Span) return Boolean is
       pragma Unreferenced (Timeout);
    begin
       if Recv_Index = 0 then

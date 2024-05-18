@@ -73,7 +73,7 @@ package body Mb_Ascii_Send_Test is
       Buffer_Asc (Send_Count) := Data;
    end SSend;
 
-   function SRecv (Data : out Byte; Timeout : in Duration) return Boolean is
+   function SRecv (Data : out Byte; Timeout : in Time_Span) return Boolean is
       pragma Unreferenced (Timeout);
       pragma Unreferenced (Data);
    begin
