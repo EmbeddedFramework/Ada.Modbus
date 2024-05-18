@@ -99,6 +99,17 @@ package body MB_Ascii is
       end if;
    end Nibble_To_Char;
 
+   ---------------------------------------------------------------------------
+   -- Description: This function calls Serial_Recv call back to receive a
+   --              byte and checks if it is the expected one.
+   -- Parameters:
+   --   - Self : Modbus Ascii Object
+   --   - B : Expected value
+   --   - Exit_On_Diff: Allows retrying if the received byte does not
+   --                   match the expected one.
+   --   - Dead_Line
+   -- Return: True if the reception was correct
+   ---------------------------------------------------------------------------
    function Wait_For_Byte (Self : in out MB_Ascii_Type;
                            B :  Byte;
                            Exit_On_Diff : Boolean;
@@ -129,6 +140,12 @@ package body MB_Ascii is
       end loop;
    end Wait_For_Byte;
 
+   ---------------------------------------------------------------------------
+   -- Description: Check if the given byte is a valid Nibble
+   -- Parameters:
+   --   - B : The byte to check.
+   -- Return: True if it is between 1..9 A..F
+   ---------------------------------------------------------------------------
    function Is_Valid_Byte(B :  Byte) return Boolean is
    begin
       if (B >=  Byte(Character'Pos('1')) and B <=  Byte(Character'Pos('9'))) or
@@ -139,6 +156,12 @@ package body MB_Ascii is
       end if;
    end Is_Valid_Byte;
 
+   ---------------------------------------------------------------------------
+   -- Description: Convert a byte to a Nibble
+   -- Parameters:
+   --   - B : The byte to convert.
+   -- Return: Nibble value
+   ---------------------------------------------------------------------------
    function Nibble_Value(B :  Byte) return Nibble is
    begin
       if B >= Byte(Character'Pos('1')) and B <= Byte(Character'Pos('9')) then
@@ -150,6 +173,13 @@ package body MB_Ascii is
       end if;
    end Nibble_Value;
 
+   ---------------------------------------------------------------------------
+   -- Description: Combine two Bytes (in Nibble range) to obtain a single Byte
+   -- Parameters:
+   --   - High : High ASCII nibble.
+   --   - Low : Low ASCII nibble.
+   -- Return: combined byte value
+   ---------------------------------------------------------------------------
    function Combine_Bytes(High, Low :  Byte) return  Byte is
       High_Nibble :  Byte;
       Low_Nibble  :  Byte;
@@ -163,7 +193,6 @@ package body MB_Ascii is
 
       return (High_Nibble * 16) + Low_Nibble;
    end Combine_Bytes;
-
 
    -- =========================================================================
    -- Public procedures and functions
