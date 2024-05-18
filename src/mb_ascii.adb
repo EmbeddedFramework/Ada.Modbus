@@ -55,6 +55,7 @@ package body MB_Ascii is
    -- Parameters:
    --   - Buffer :
    --   - Length :
+   -- Return: LRC Calculated
    ---------------------------------------------------------------------------
    function Calc_LRC (Buffer :  Byte_Array ;
                       Length : MB_Transport.Msg_Length) return  Byte is
@@ -66,6 +67,15 @@ package body MB_Ascii is
       return -Result;
    end Calc_LRC;
 
+   ---------------------------------------------------------------------------
+   -- Description: Check if the LRC of the given buffer is correct. Assumes
+   --              that the LRC is the last byte of the array.
+   -- Parameters:
+   --   - Buffer :
+   --   - Length :
+   -- Return: True if the LRC is correct
+   --         False if the LRC in incorrect
+   ---------------------------------------------------------------------------
    function Check_LRC (Buffer :  Byte_Array ;
                       Length : MB_Transport.Msg_Length) return Boolean is
       Lrc :  Byte;
@@ -74,7 +84,13 @@ package body MB_Ascii is
       return Lrc = Buffer(Length);
    end Check_LRC;
 
-   function Nibble_To_Char(N : Nibble) return  Byte is
+   ---------------------------------------------------------------------------
+   -- Description: Convert Nibble to a Byte
+   -- Parameters:
+   --   - N :
+   -- Return: Ascii byte from the given Nibble
+   ---------------------------------------------------------------------------
+   function Nibble_To_Char(N : Nibble) return Byte is
    begin
       if N < 10 then
          return  Byte(Character'Pos('0') + Nibble'Pos(N));
@@ -82,46 +98,6 @@ package body MB_Ascii is
          return  Byte(Character'Pos('A') + Nibble'Pos(N) - 10);
       end if;
    end Nibble_To_Char;
-
-   overriding
-   procedure Send (Self : in out MB_Ascii_Type ;
-                   Buffer :  Byte_Array ;
-                   Length : MB_Transport.Msg_Length) is
-      Ascii_Length : Msg_Length := Length;
-      High : Nibble := 0;
-      Low : Nibble := 0;
-
-   begin
-
-      for I in 1 .. Length loop
-         Self.Buffer(I) := Buffer(I);
-      end loop;
-
-      Self.Buffer (Length + 1) := Calc_LRC(Self.Buffer, Ascii_Length);
-      Ascii_Length := Ascii_Length + 1;
-
-      for I in reverse 1 .. Ascii_Length loop
-         High := Nibble(Self.Buffer(I) / 16);
-         Low := Nibble(Self.Buffer(I) mod 16);
-
-         Self.Buffer (I * 2 + 0) := Nibble_To_Char(High);
-         Self.Buffer (I * 2 + 1) := Nibble_To_Char(Low);
-      end loop;
-
-      Self.Buffer (1) := Start_Byte;
-      Ascii_Length := Ascii_Length * 2 + 1;
-
-      Ascii_Length := Ascii_Length + 1;
-      Self.Buffer (Ascii_Length) := End1_Byte;
-
-      Ascii_Length := Ascii_Length + 1;
-      Self.Buffer (Ascii_Length) := End2_Byte;
-
-      for I in 1 .. Ascii_Length loop
-         Self.Serial_Send(Self.Buffer(I));
-      end loop;
-
-   end Send;
 
    function Wait_For_Byte (Self : in out MB_Ascii_Type;
                            B :  Byte;
@@ -187,6 +163,51 @@ package body MB_Ascii is
 
       return (High_Nibble * 16) + Low_Nibble;
    end Combine_Bytes;
+
+
+   -- =========================================================================
+   -- Public procedures and functions
+   -- =========================================================================
+
+   overriding
+   procedure Send (Self : in out MB_Ascii_Type ;
+                   Buffer :  Byte_Array ;
+                   Length : MB_Transport.Msg_Length) is
+      Ascii_Length : Msg_Length := Length;
+      High : Nibble := 0;
+      Low : Nibble := 0;
+
+   begin
+
+      for I in 1 .. Length loop
+         Self.Buffer(I) := Buffer(I);
+      end loop;
+
+      Self.Buffer (Length + 1) := Calc_LRC(Self.Buffer, Ascii_Length);
+      Ascii_Length := Ascii_Length + 1;
+
+      for I in reverse 1 .. Ascii_Length loop
+         High := Nibble(Self.Buffer(I) / 16);
+         Low := Nibble(Self.Buffer(I) mod 16);
+
+         Self.Buffer (I * 2 + 0) := Nibble_To_Char(High);
+         Self.Buffer (I * 2 + 1) := Nibble_To_Char(Low);
+      end loop;
+
+      Self.Buffer (1) := Start_Byte;
+      Ascii_Length := Ascii_Length * 2 + 1;
+
+      Ascii_Length := Ascii_Length + 1;
+      Self.Buffer (Ascii_Length) := End1_Byte;
+
+      Ascii_Length := Ascii_Length + 1;
+      Self.Buffer (Ascii_Length) := End2_Byte;
+
+      for I in 1 .. Ascii_Length loop
+         Self.Serial_Send(Self.Buffer(I));
+      end loop;
+
+   end Send;
 
    overriding
    function Recv (Self :  in out MB_Ascii_Type ;
