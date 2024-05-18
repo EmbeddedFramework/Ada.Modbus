@@ -39,9 +39,9 @@ with MB_Types; use MB_Types;
 
 package body MB_Ascii is
 
-   Start_Byte : constant MB_Types.Byte := 58;
-   End1_Byte : constant MB_Types.Byte := 13;
-   End2_Byte : constant MB_Types.Byte := 10;
+   Start_Byte : constant  Byte := 58;
+   End1_Byte : constant  Byte := 13;
+   End2_Byte : constant  Byte := 10;
 
    subtype Msg_Length is Integer range 0 .. MB_Ascii.Msg_Max_Length;
    subtype Nibble is Interfaces.Unsigned_8 range 0 .. 15;
@@ -49,10 +49,10 @@ package body MB_Ascii is
    -- ':' + ID + FNC_COD + LRC + CR + LF
    Min_Msg_Length : constant Msg_Length := 1 + 2 + 2 + 2 + 1 + 1;
 
-   function Calc_LRC (Buffer : MB_Types.Byte_Array ;
-                      Length : MB_Transport.Msg_Length) return MB_Types.Byte is
+   function Calc_LRC (Buffer :  Byte_Array ;
+                      Length : MB_Transport.Msg_Length) return  Byte is
 
-      Result : MB_Types.Byte := 0;
+      Result :  Byte := 0;
    begin
       for I in 1 .. Length loop
          Result := Result + Buffer(I);
@@ -60,18 +60,18 @@ package body MB_Ascii is
       return -Result;
    end Calc_LRC;
 
-   function Nibble_To_Char(N : Nibble) return MB_Types.Byte is
+   function Nibble_To_Char(N : Nibble) return  Byte is
    begin
       if N < 10 then
-         return MB_Types.Byte(Character'Pos('0') + Nibble'Pos(N));
+         return  Byte(Character'Pos('0') + Nibble'Pos(N));
       else
-         return MB_Types.Byte(Character'Pos('A') + Nibble'Pos(N) - 10);
+         return  Byte(Character'Pos('A') + Nibble'Pos(N) - 10);
       end if;
    end Nibble_To_Char;
 
    overriding
    procedure Send (Self : in out MB_Ascii_Type ;
-                   Buffer : MB_Types.Byte_Array ;
+                   Buffer :  Byte_Array ;
                    Length : MB_Transport.Msg_Length) is
       Ascii_Length : Msg_Length := Length;
       High : Nibble := 0;
@@ -109,19 +109,19 @@ package body MB_Ascii is
 
    end Send;
 
-   function Check_LRC (Buffer : MB_Types.Byte_Array ;
+   function Check_LRC (Buffer :  Byte_Array ;
                       Length : MB_Transport.Msg_Length) return Boolean is
-      Lrc : MB_Types.Byte;
+      Lrc :  Byte;
    begin
       Lrc := Calc_LRC (Buffer, Length - 1);
       return Lrc = Buffer(Length-1);
    end Check_LRC;
 
    function Wait_For_Byte (Self : in out MB_Ascii_Type;
-                           Byte : MB_Types.Byte;
+                           B :  Byte;
                            Exit_On_Diff : Boolean;
                            Dead_Line : Time) return Boolean is
-      Byte_Rec : MB_Types.Byte;
+      Byte_Rec :  Byte;
       Ret : Boolean;
       Timeout : Time_Span;
    begin
@@ -134,7 +134,7 @@ package body MB_Ascii is
 
          Ret := Self.Serial_Recv (Byte_Rec, Timeout);
          if Ret = True then
-            if Byte_Rec = Byte then
+            if Byte_Rec = B then
                return True;
             else
                if Exit_On_Diff then
@@ -147,17 +147,17 @@ package body MB_Ascii is
       end loop;
    end Wait_For_Byte;
 
-   function Is_Valid_Byte(B : MB_Types.Byte) return Boolean is
+   function Is_Valid_Byte(B :  Byte) return Boolean is
    begin
-      if (B >= MB_Types.Byte(Character'Pos('1')) and B <= MB_Types.Byte(Character'Pos('2'))) or
-         (B >= MB_Types.Byte(Character'Pos('A')) and B <= MB_Types.Byte(Character'Pos('F'))) then
+      if (B >=  Byte(Character'Pos('1')) and B <=  Byte(Character'Pos('2'))) or
+         (B >=  Byte(Character'Pos('A')) and B <=  Byte(Character'Pos('F'))) then
          return True;
       else
          return False;
       end if;
    end Is_Valid_Byte;
 
-   function Nibble_Value(B : MB_Types.Byte) return Nibble is
+   function Nibble_Value(B :  Byte) return Nibble is
    begin
       if B >= Byte(Character'Pos('1')) and B <= Byte(Character'Pos('2')) then
          return B - Byte(Character'Pos('0'));
@@ -168,9 +168,9 @@ package body MB_Ascii is
       end if;
    end Nibble_Value;
 
-   function Combine_Bytes(High, Low : MB_Types.Byte) return MB_Types.Byte is
-      High_Nibble : MB_Types.Byte;
-      Low_Nibble  : MB_Types.Byte;
+   function Combine_Bytes(High, Low :  Byte) return  Byte is
+      High_Nibble :  Byte;
+      Low_Nibble  :  Byte;
    begin
       if not Is_Valid_Byte(High) or not Is_Valid_Byte(Low) then
          raise Constraint_Error with "Invalid byte value";
@@ -190,7 +190,7 @@ package body MB_Ascii is
       Dead_Line : Time := Timeout + Clock;
       Ret : Boolean;
       Index : Msg_Length := 0;
-      Byte_Rec : MB_Types.Byte;
+      Byte_Rec : Byte;
    begin
 
       -- Wait for ':'
