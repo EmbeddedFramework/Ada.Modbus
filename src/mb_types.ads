@@ -53,7 +53,7 @@ package MB_Types is
                          Index : in Positive);
 
    -- Procedure to write 16 bits to Byte_Array
-   procedure Write_Multiples_Words (W_A : in Word_Array;
+   procedure Write_Multiples_Words (W_A      : in Word_Array;
                                     Index_WA : in Positive;
                                     Qty      : in Positive;
                                     B_A      : out Byte_Array;

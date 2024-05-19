@@ -44,7 +44,7 @@ package body MB_Types is
       B_A(Index + 1) := Unsigned_8(W mod 16#100#); -- Lower byte
    end Write_Word;
 
-   procedure Write_Multiples_Words (W_A : in Word_Array;
+   procedure Write_Multiples_Words (W_A        : in Word_Array;
                                       Index_WA : in Positive;
                                       Qty      : in Positive;
                                       B_A      : out Byte_Array;
