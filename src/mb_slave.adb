@@ -31,14 +31,63 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+with MB_Protocol;
+with Interfaces; use Interfaces;
+with MB_Types; use MB_Types;
+
+
 package body MB_Slave is
 
-   function process (Buffer : MB_Types.Byte_Array;
+
+   function process (Buffer : in out Byte_Array;
                      Start_PDU : MB_Transport.Msg_Length;
-                     Length : MB_Transport.Msg_Length)
+                     Length : MB_Transport.Msg_Length;
+                     Cmd : Cmd_Type_Ptr)
                      return MB_Transport.Msg_Length is
+      Exception_Code : Byte := MB_Protocol.E_OK;
+      Ret : MB_Transport.Msg_Length;
    begin
-      return 0;
+
+      case Buffer (Start_PDU) is
+         when MB_Protocol.FCN_READ_COILS =>
+            null;
+
+         when MB_Protocol.FCN_READ_HOLDING_REGISTERS =>
+            if Cmd.Cmd_0x03_Read_Holding_Reg = null then
+               Exception_Code := MB_Protocol.E_FNC_NOT_SUPPORTED;
+            else
+               declare
+                  Addr : Address := Read_16_Bits (Buffer, 3);
+                  Qty  : Address := Read_16_Bits (Buffer, 5);
+                  Buffer_HR :
+                  Holding_Register_Array (1 .. Standard.Integer (Qty));
+               begin
+
+                  if Qty > 16#7D# or Qty < 1 then
+                     Exception_Code := E_WRONG_REG_QTY;
+                  else
+                     Ret := Cmd.Cmd_0x03_Read_Holding_Reg (Addr, Qty,
+                                                           Exception_Code,
+                                                           Buffer_HR);
+                  end if;
+               end;
+
+            end if;
+
+
+         when others =>
+            null;
+      end case;
+
+      if Exception_Code /= MB_Protocol.E_OK then
+         Buffer (Start_PDU) := Buffer (Start_PDU) or MB_Protocol.ERROR_FLAG;
+         Buffer (Start_PDU + 1) := Exception_Code;
+         Ret := 3;
+      end if;
+
+
+      return Ret;
+
    end process;
 
 

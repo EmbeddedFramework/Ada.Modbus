@@ -39,4 +39,19 @@ package MB_Types is
    
    type Byte_Array is array (Positive range <>) of Byte;
 
+   subtype Address is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
+   subtype Quantity is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
+   
+   subtype Holding_Register is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
+   type Holding_Register_Array is array (Positive range <>) of Holding_Register;
+   
+   -- Procedure to write 16 bits to Byte_Array
+   procedure Write_16_Bits (Register : in Holding_Register;
+                                     Buffer   : out Byte_Array;
+                                     Index    : in Positive);
+
+   -- Function to read 16 bits from Byte_Array
+   function Read_16_Bits (Buffer : in Byte_Array;
+                                   Index  : in Positive) return Holding_Register;
+   
 end MB_Types;

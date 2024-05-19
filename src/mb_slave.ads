@@ -36,9 +36,26 @@ with MB_Transport;
 
 package MB_Slave is
 
-   function process (Buffer : MB_Types.Byte_Array;
-                     Start_PDU : MB_Transport.Msg_Length;
-                     Length : MB_Transport.Msg_Length)
-                     return MB_Transport.Msg_Length;
+   type Read_Holding_Register is access function (
+      Start      : MB_Types.Address;
+      Quantity   : MB_Types.Quantity;
+      Exception_Code : out MB_Types.Byte;
+      Buffer     : out MB_Types.Holding_Register_Array
+   ) return MB_Transport.Msg_Length;
+
+   type Cmd_Type is record
+      Cmd_0x03_Read_Holding_Reg    : Read_Holding_Register;
+   end record;
+
+   -- Definición del tipo de acceso al registro
+   type Cmd_Type_Ptr is access all Cmd_Type;
+
+   -- Función que procesa el buffer
+   function Process (
+      Buffer     : in out MB_Types.Byte_Array;
+      Start_PDU  : MB_Transport.Msg_Length;
+      Length     : MB_Transport.Msg_Length;
+      Cmd        : Cmd_Type_Ptr
+   ) return MB_Transport.Msg_Length;
 
 end MB_Slave;
