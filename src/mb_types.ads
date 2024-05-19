@@ -64,4 +64,11 @@ package MB_Types is
    function Read_Word (B_A   : in Byte_Array;
                        Index : in Positive) return Word;
    
+   -- Procedure to read 16 bits from Byte_Array
+   procedure Read_Multiples_Words (W_A      : out Word_Array;
+                                    Index_WA : in Positive;
+                                    Qty      : in Positive;
+                                    B_A      : in Byte_Array;
+                                    Index_BA : in Positive);
+   
 end MB_Types;

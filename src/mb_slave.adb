@@ -49,9 +49,10 @@ package body MB_Slave is
    begin
 
       case Buffer (Start_PDU) is
-         when MB_Protocol.FCN_READ_COILS =>
-            null;
 
+         -- ===================================================================
+         -- READ_HOLDING_REGISTERS
+         -- ===================================================================
          when MB_Protocol.FCN_READ_HOLDING_REGISTERS =>
             if Cmd.Cmd_0x03_Read_Holding_Reg = null then
                Exception_Code := MB_Protocol.E_FNC_NOT_SUPPORTED;
@@ -80,11 +81,44 @@ package body MB_Slave is
                      end if;
                   end if;
                end;
-
             end if;
 
+         -- ===================================================================
+         -- WRITE_MULTIPLE_REGISTERS
+         -- ===================================================================
+         when MB_Protocol.FCN_WRITE_MULTIPLE_REGISTERS =>
+            if Cmd.Cmd_0x10_Write_Holding_Reg = null then
+               Exception_Code := MB_Protocol.E_FNC_NOT_SUPPORTED;
+            else
+               declare
+                  Addr : Address  := Read_Word (Buffer, 3);
+                  Qty  : Quantity := Read_Word (Buffer, 5);
+                  BC   : Byte     := Buffer (7);
+                  Buffer_HR :
+                  Holding_Register_Array (1 .. Standard.Integer (Qty));
+               begin
+
+                  if Qty > 16#7B# or Qty < 1 or Qty * 2 /= Quantity (BC) then
+                     Exception_Code := MB_Protocol.E_WRONG_REG_QTY;
+                  else
+                     -- registers values
+                     Read_Multiples_Words (Buffer_HR, 1, Buffer_HR'Length,
+                                           Buffer, 8);
+                     Cmd.Cmd_0x10_Write_Holding_Reg (Addr, Qty, Exception_Code,
+                                                    Buffer_HR);
+
+                     if Exception_Code = MB_Protocol.E_OK then
+                        --     ID + FNC + Start + Qty
+                        Ret := 1  +  1  +   2   + 2 ;
+                     end if;
+                  end if;
+               end;
+            end if;
+
+
          when others =>
-            null;
+            Exception_Code := MB_Protocol.E_FNC_NOT_SUPPORTED;
+
       end case;
 
       if Exception_Code /= MB_Protocol.E_OK then

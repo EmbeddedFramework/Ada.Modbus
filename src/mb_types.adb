@@ -61,8 +61,8 @@ package body MB_Types is
 
 
    function Read_Word (B_A   : in Byte_Array;
-                          Index : in Positive)
-                        return Interfaces.Unsigned_16 is
+                       Index : in Positive)
+                       return Interfaces.Unsigned_16 is
       Higher_Byte : Unsigned_16;
       Lower_Byte  : Unsigned_16;
    begin
@@ -70,5 +70,22 @@ package body MB_Types is
       Lower_Byte  := Unsigned_16 (B_A (Index + 1));
       return Interfaces.Unsigned_16((Higher_Byte * 16#100#) + Lower_Byte);
    end Read_Word;
+
+
+   procedure Read_Multiples_Words (W_A      : out Word_Array;
+                                   Index_WA : in Positive;
+                                   Qty      : in Positive;
+                                   B_A      : in Byte_Array;
+                                   Index_BA : in Positive) is
+      Count_BA : Integer := 0;
+   begin
+      for I in Index_WA .. Qty + Index_WA - 1 loop
+         W_A (I) := Read_Word (B_A, Index_BA + Count_BA);
+         Count_BA := Count_BA + 2;
+      end loop;
+
+   end Read_Multiples_Words;
+
+
 
 end MB_Types;

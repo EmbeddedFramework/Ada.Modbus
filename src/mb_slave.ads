@@ -36,15 +36,24 @@ with MB_Transport;
 
 package MB_Slave is
 
-   type Read_Holding_Register is access procedure (
+   type Read_Holding_Registers is access procedure (
       Start      : MB_Types.Address;
       Quantity   : MB_Types.Quantity;
       Exception_Code : out MB_Types.Byte;
       Buffer     : out MB_Types.Holding_Register_Array
    );
 
+   type Write_Holding_Registers is access procedure (
+      Start      : MB_Types.Address;
+      Quantity   : MB_Types.Quantity;
+      Exception_Code : out MB_Types.Byte;
+      Buffer     : in MB_Types.Holding_Register_Array
+   );
+
+
    type Cmd_Type is record
-      Cmd_0x03_Read_Holding_Reg    : Read_Holding_Register;
+      Cmd_0x03_Read_Holding_Reg    : Read_Holding_Registers;
+      Cmd_0x10_Write_Holding_Reg   : Write_Holding_Registers;
    end record;
 
    -- Definición del tipo de acceso al registro
