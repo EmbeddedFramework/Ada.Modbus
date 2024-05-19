@@ -36,15 +36,15 @@ with Interfaces; use Interfaces;
 
 package body MB_Types is
 
-   procedure Write_16_Bits (W     : in Word;
+   procedure Write_Word (W     : in Word;
                             B_A   : out Byte_Array;
                             Index : in Positive) is
    begin
       B_A(Index)     := Unsigned_8(W / 16#100#); -- Higher byte
       B_A(Index + 1) := Unsigned_8(W mod 16#100#); -- Lower byte
-   end Write_16_Bits;
+   end Write_Word;
 
-   procedure Write_Multiples_16_Bits (W_A : in Word_Array;
+   procedure Write_Multiples_Words (W_A : in Word_Array;
                                       Index_WA : in Positive;
                                       Qty      : in Positive;
                                       B_A      : out Byte_Array;
@@ -53,14 +53,14 @@ package body MB_Types is
    begin
 
       for I in Index_WA .. Qty + Index_WA - 1 loop
-         Write_16_Bits (W_A (I), B_A, Index_BA + Count_BA);
+         Write_Word (W_A (I), B_A, Index_BA + Count_BA);
          Count_BA := Count_BA + 2;
       end loop;
 
-   end Write_Multiples_16_Bits;
+   end Write_Multiples_Words;
 
 
-   function Read_16_Bits (B_A   : in Byte_Array;
+   function Read_Word (B_A   : in Byte_Array;
                           Index : in Positive)
                         return Interfaces.Unsigned_16 is
       Higher_Byte : Unsigned_16;
@@ -69,6 +69,6 @@ package body MB_Types is
       Higher_Byte := Unsigned_16 (B_A (Index));
       Lower_Byte  := Unsigned_16 (B_A (Index + 1));
       return Interfaces.Unsigned_16((Higher_Byte * 16#100#) + Lower_Byte);
-   end Read_16_Bits;
+   end Read_Word;
 
 end MB_Types;

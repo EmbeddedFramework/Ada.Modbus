@@ -48,20 +48,20 @@ package MB_Types is
    subtype Holding_Register_Array is Word_Array;
    
    -- Procedure to write 16 bits to Byte_Array
-   procedure Write_16_Bits (W     : in Word;
-                            B_A   : out Byte_Array;
-                            Index : in Positive);
+   procedure Write_Word (W     : in Word;
+                         B_A   : out Byte_Array;
+                         Index : in Positive);
 
    -- Procedure to write 16 bits to Byte_Array
-   procedure Write_Multiples_16_Bits (W_A : in Word_Array;
-                                      Index_WA : in Positive;
-                                      Qty      : in Positive;
-                                      B_A      : out Byte_Array;
-                                      Index_BA : in Positive);
+   procedure Write_Multiples_Words (W_A : in Word_Array;
+                                    Index_WA : in Positive;
+                                    Qty      : in Positive;
+                                    B_A      : out Byte_Array;
+                                    Index_BA : in Positive);
    
 
    -- Function to read 16 bits from Byte_Array
-   function Read_16_Bits (B_A   : in Byte_Array;
-                          Index : in Positive) return Word;
+   function Read_Word (B_A   : in Byte_Array;
+                       Index : in Positive) return Word;
    
 end MB_Types;

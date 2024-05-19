@@ -57,8 +57,8 @@ package body MB_Slave is
                Exception_Code := MB_Protocol.E_FNC_NOT_SUPPORTED;
             else
                declare
-                  Addr : Address := Read_16_Bits (Buffer, 3);
-                  Qty  : Address := Read_16_Bits (Buffer, 5);
+                  Addr : Address := Read_Word (Buffer, 3);
+                  Qty  : Address := Read_Word (Buffer, 5);
                   Buffer_HR :
                   Holding_Register_Array (1 .. Standard.Integer (Qty));
                begin
