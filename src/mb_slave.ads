@@ -36,12 +36,12 @@ with MB_Transport;
 
 package MB_Slave is
 
-   type Read_Holding_Register is access function (
+   type Read_Holding_Register is access procedure (
       Start      : MB_Types.Address;
       Quantity   : MB_Types.Quantity;
       Exception_Code : out MB_Types.Byte;
       Buffer     : out MB_Types.Holding_Register_Array
-   ) return MB_Transport.Msg_Length;
+   );
 
    type Cmd_Type is record
       Cmd_0x03_Read_Holding_Reg    : Read_Holding_Register;

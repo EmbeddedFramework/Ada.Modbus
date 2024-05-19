@@ -57,8 +57,8 @@ package body MB_Slave is
                Exception_Code := MB_Protocol.E_FNC_NOT_SUPPORTED;
             else
                declare
-                  Addr : Address := Read_Word (Buffer, 3);
-                  Qty  : Address := Read_Word (Buffer, 5);
+                  Addr : Address  := Read_Word (Buffer, 3);
+                  Qty  : Quantity := Read_Word (Buffer, 5);
                   Buffer_HR :
                   Holding_Register_Array (1 .. Standard.Integer (Qty));
                begin
@@ -66,15 +66,22 @@ package body MB_Slave is
                   if Qty > 16#7D# or Qty < 1 then
                      Exception_Code := MB_Protocol.E_WRONG_REG_QTY;
                   else
-                     Ret := Cmd.Cmd_0x03_Read_Holding_Reg (Addr, Qty,
-                                                           Exception_Code,
-                                                           Buffer_HR);
+                     Cmd.Cmd_0x03_Read_Holding_Reg (Addr, Qty, Exception_Code,
+                                                    Buffer_HR);
 
+                     if Exception_Code = MB_Protocol.E_OK then
+                        -- byte count:
+                        Buffer (3) := MB_Types.Byte(Qty) * 2;
+                        -- registers values
+                        Write_Multiples_Words (Buffer_HR, 1, Buffer_HR'Length,
+                                               Buffer, 4);
+                        --     ID + FNC + BC + HRs
+                        Ret := 1  +  1  + 1  + Integer(Qty) * 2;
+                     end if;
                   end if;
                end;
 
             end if;
-
 
          when others =>
             null;
@@ -86,10 +93,8 @@ package body MB_Slave is
          Ret := 3;
       end if;
 
-
       return Ret;
 
    end process;
-
 
 end MB_Slave;
