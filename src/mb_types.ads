@@ -35,23 +35,33 @@ with Interfaces;
 
 package MB_Types is
    
-   subtype Byte is Interfaces.Unsigned_8;
-   
+   subtype Byte is Interfaces.Unsigned_8;   
    type Byte_Array is array (Positive range <>) of Byte;
 
-   subtype Address is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
-   subtype Quantity is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
+   subtype Word is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
+   type Word_Array is array (Positive range <>) of Word;
    
-   subtype Holding_Register is Interfaces.Unsigned_16 range 0 .. 16#FFFF#;
-   type Holding_Register_Array is array (Positive range <>) of Holding_Register;
+   subtype Address is Word range 0 .. 16#FFFF#;
+   subtype Quantity is Word range 0 .. 16#FFFF#;
+   
+   subtype Holding_Register is Word;
+   subtype Holding_Register_Array is Word_Array;
    
    -- Procedure to write 16 bits to Byte_Array
-   procedure Write_16_Bits (Register : in Holding_Register;
-                                     Buffer   : out Byte_Array;
-                                     Index    : in Positive);
+   procedure Write_16_Bits (W     : in Word;
+                            B_A   : out Byte_Array;
+                            Index : in Positive);
+
+   -- Procedure to write 16 bits to Byte_Array
+   procedure Write_Multiples_16_Bits (W_A : in Word_Array;
+                                      Index_WA : in Positive;
+                                      Qty      : in Positive;
+                                      B_A      : out Byte_Array;
+                                      Index_BA : in Positive);
+   
 
    -- Function to read 16 bits from Byte_Array
-   function Read_16_Bits (Buffer : in Byte_Array;
-                                   Index  : in Positive) return Holding_Register;
+   function Read_16_Bits (B_A   : in Byte_Array;
+                          Index : in Positive) return Word;
    
 end MB_Types;

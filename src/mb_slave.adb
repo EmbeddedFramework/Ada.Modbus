@@ -64,11 +64,12 @@ package body MB_Slave is
                begin
 
                   if Qty > 16#7D# or Qty < 1 then
-                     Exception_Code := E_WRONG_REG_QTY;
+                     Exception_Code := MB_Protocol.E_WRONG_REG_QTY;
                   else
                      Ret := Cmd.Cmd_0x03_Read_Holding_Reg (Addr, Qty,
                                                            Exception_Code,
                                                            Buffer_HR);
+
                   end if;
                end;
 
