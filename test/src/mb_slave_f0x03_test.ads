@@ -32,20 +32,23 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
-with Mb_Ascii_Send_Test;
-with Mb_Ascii_Recv_Test;
-with Mb_Slave_F0x03_Test;
+with AUnit;
+with AUnit.Simple_Test_Cases;
+with MB_Types;
 
-package body Modbus_Suite is
+package Mb_Slave_F0x03_Test is
 
-   function Suite return Access_Test_Suite is
-      Ret : constant Access_Test_Suite := new Test_Suite;
-   begin
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Recv_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test.Test));
-      return Ret;
-   end Suite;
+   type Test is new AUnit.Simple_Test_Cases.Test_Case with null record;
 
-end Modbus_Suite;
+   function Name (T : Test) return AUnit.Message_String;
+
+   procedure Run_Test (T : in out Test);
+
+private
+   procedure F0x03 (Start      : MB_Types.Address;
+                    Quantity   : MB_Types.Quantity;
+                    Exception_Code : out MB_Types.Byte;
+                    Buffer     : out MB_Types.Holding_Register_Array);
+
+
+end Mb_Slave_F0x03_Test;
