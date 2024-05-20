@@ -55,7 +55,7 @@ package MB_Types is
    -- Procedure to write 16 bits to Byte_Array
    procedure Write_Multiples_Words (W_A      : in Word_Array;
                                     Index_WA : in Positive;
-                                    Qty      : in Positive;
+                                    Qty      : in Quantity;
                                     B_A      : out Byte_Array;
                                     Index_BA : in Positive);
    
@@ -67,7 +67,7 @@ package MB_Types is
    -- Procedure to read 16 bits from Byte_Array
    procedure Read_Multiples_Words (W_A      : out Word_Array;
                                     Index_WA : in Positive;
-                                    Qty      : in Positive;
+                                    Qty      : in Quantity;
                                     B_A      : in Byte_Array;
                                     Index_BA : in Positive);
    

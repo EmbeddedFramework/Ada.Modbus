@@ -75,7 +75,7 @@ package body MB_Slave is
                         -- byte count:
                         Buffer (Start_PDU + 1) := MB_Types.Byte(Qty) * 2;
                         -- registers values
-                        Write_Multiples_Words (Buffer_HR, 1, Buffer_HR'Length,
+                        Write_Multiples_Words (Buffer_HR, 1, Qty,
                                                Buffer, Start_PDU + 2);
                         -- Return length of PDU
                         --    FNC + BC + HRs
@@ -104,7 +104,7 @@ package body MB_Slave is
                      Exception_Code := MB_Protocol.E_WRONG_REG_QTY;
                   else
                      -- registers values
-                     Read_Multiples_Words (Buffer_HR, 1, Buffer_HR'Length,
+                     Read_Multiples_Words (Buffer_HR, 1, Qty,
                                            Buffer, Start_PDU + 6);
                      Cmd.Cmd_0x10_Write_Holding_Reg (Addr, Qty, Exception_Code,
                                                     Buffer_HR);

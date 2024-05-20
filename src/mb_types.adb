@@ -46,13 +46,13 @@ package body MB_Types is
 
    procedure Write_Multiples_Words (W_A        : in Word_Array;
                                       Index_WA : in Positive;
-                                      Qty      : in Positive;
+                                      Qty      : in Quantity;
                                       B_A      : out Byte_Array;
                                       Index_BA : in Positive) is
       Count_BA : Integer := 0;
    begin
 
-      for I in Index_WA .. Qty + Index_WA - 1 loop
+      for I in Index_WA .. Positive (Qty) + Index_WA - 1 loop
          Write_Word (W_A (I), B_A, Index_BA + Count_BA);
          Count_BA := Count_BA + 2;
       end loop;
@@ -74,12 +74,12 @@ package body MB_Types is
 
    procedure Read_Multiples_Words (W_A      : out Word_Array;
                                    Index_WA : in Positive;
-                                   Qty      : in Positive;
+                                   Qty      : in Quantity;
                                    B_A      : in Byte_Array;
                                    Index_BA : in Positive) is
       Count_BA : Integer := 0;
    begin
-      for I in Index_WA .. Qty + Index_WA - 1 loop
+      for I in Index_WA .. Positive (Qty) + Index_WA - 1 loop
          W_A (I) := Read_Word (B_A, Index_BA + Count_BA);
          Count_BA := Count_BA + 2;
       end loop;
