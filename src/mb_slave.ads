@@ -63,7 +63,6 @@ package MB_Slave is
    function Process (
       Buffer     : in out MB_Types.Byte_Array;
       Start_PDU  : MB_Transport.Msg_Length;
-      Length     : MB_Transport.Msg_Length;
       Cmd        : Cmd_Type_Ptr
    ) return MB_Transport.Msg_Length;
 
