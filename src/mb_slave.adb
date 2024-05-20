@@ -127,7 +127,7 @@ package body MB_Slave is
       if Exception_Code /= MB_Protocol.E_OK then
          Buffer (Start_PDU) := Buffer (Start_PDU) or MB_Protocol.ERROR_FLAG;
          Buffer (Start_PDU + 1) := Exception_Code;
-         Ret := 3;
+         Ret := 2;
       end if;
 
       return Ret;
