@@ -43,7 +43,7 @@ package body Mb_Slave_F0x10_Test is
    function Name (T : Test) return AUnit.Message_String is
       pragma Unreferenced (T);
    begin
-      return AUnit.Format ("Test Modbus Slave F0x03");
+      return AUnit.Format ("Test Modbus Slave F0x10");
    end Name;
 
    Buffer_Bin : MB_Types.Byte_Array (1 .. MB_Transport.ID_PDU_Length) :=
