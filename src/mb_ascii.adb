@@ -36,6 +36,7 @@ with Ada.Real_Time; use Ada.Real_Time;
 with Interfaces; use Interfaces;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with MB_Types; use MB_Types;
+with Ada.Text_IO; use Ada.Text_IO;
 
 package body MB_Ascii is
 
@@ -148,7 +149,7 @@ package body MB_Ascii is
    ---------------------------------------------------------------------------
    function Is_Valid_Byte(B :  Byte) return Boolean is
    begin
-      if (B >=  Byte(Character'Pos('1')) and B <=  Byte(Character'Pos('9'))) or
+      if (B >=  Byte(Character'Pos('0')) and B <=  Byte(Character'Pos('9'))) or
          (B >=  Byte(Character'Pos('A')) and B <=  Byte(Character'Pos('F'))) then
          return True;
       else
@@ -164,7 +165,7 @@ package body MB_Ascii is
    ---------------------------------------------------------------------------
    function Nibble_Value(B :  Byte) return Nibble is
    begin
-      if B >= Byte(Character'Pos('1')) and B <= Byte(Character'Pos('9')) then
+      if B >= Byte(Character'Pos('0')) and B <= Byte(Character'Pos('9')) then
          return B - Byte(Character'Pos('0'));
       elsif B >= Byte(Character'Pos('A')) and B <= Byte(Character'Pos('F')) then
          return B - Byte(Character'Pos('A')) + 10;
@@ -255,6 +256,7 @@ package body MB_Ascii is
          return 0;
       end if;
 
+      Put_Line ("Se recibió :.");
       -- Reception
       loop
 
@@ -267,8 +269,11 @@ package body MB_Ascii is
          Ret := Self.Serial_Recv (Byte_Rec, Time_Remaining);
 
          if Ret = False then
+            Put_Line ("Tieout");
             return 0;
          end if;
+
+         Put_Line ("Rec: " & Byte_Rec'Image);
 
          case Byte_Rec is
             when Character'Pos(':') =>
