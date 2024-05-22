@@ -68,7 +68,7 @@ package body Mb_Slave_F0x03_Test is
          return;
       end if;
 
-      if Quantity >= Buffer_HR'Length + Start then
+      if Quantity > Buffer_HR'Length + Start then
          Exception_Code := MB_Protocol.E_WRONG_STR_ADDR;
          return;
       end if;
