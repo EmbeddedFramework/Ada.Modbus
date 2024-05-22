@@ -46,6 +46,8 @@ package MB_Transport is
 
    PDU_Length : constant Integer := 253;
    ID_PDU_Length : constant Integer := 1 + PDU_Length;
+   ID_Pos : constant Integer := 1;
+   PDU_Pos : constant Integer := 2;
 
    -- Use the following type to manage index securely in the modbus buffers
    subtype Msg_Length is Integer range 0 .. ID_PDU_Length;
