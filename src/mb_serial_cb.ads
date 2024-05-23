@@ -36,10 +36,22 @@ with MB_Types; use MB_Types;
 
 package MB_Serial_CB is
 
+   ---------------------------------------------------------------------------
+   -- Description: Receive data from the serial port
+   -- Parameters:
+   --   - Data   : Data received
+   --   - Timeout: Maximum time to wait for a data.
+   -- Return: True if data has been received.
+   ---------------------------------------------------------------------------
    type Recv_CB is access function (Data : out Byte ;
                                     Timeout : in Ada.Real_Time.Time_Span)
                                     return Boolean;
 
+   ---------------------------------------------------------------------------
+   -- Description: Send data to the serial port
+   -- Parameters:
+   --   - Data   : Data to be sent
+   ---------------------------------------------------------------------------
    type Send_CB is access procedure (Data : in Byte);
 
 end MB_Serial_CB;
