@@ -31,6 +31,11 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+-- This is a simple example for using Ada_Modbus on a PC serial port (POSIX).
+-- It maps several Holding Registers and allows access to them by:
+-- 0x03 Read Multiple Holding Registers Function
+-- 0x10 Write Multiple Holding Registers Function
+
 with MB_Types;
 with MB_Protocol;
 with MB_Transport;
@@ -46,11 +51,20 @@ package body Modbus_Slave is
    My_MB_Ascii : MB_Ascii.MB_Ascii_Type (Serial.Recv'Access, Serial.Send'Access);
    
    Buffer_HR : MB_Types.Holding_Register_Array :=
-     (1 => 16#0000#,
-      2 => 16#1111#,
-      3 => 16#2222#,
-      4 => 16#AAAA#);
+     (1 => 10#0000#,
+      2 => 10#1111#,
+      3 => 10#2222#,
+      4 => 10#1234#);
    
+   ---------------------------------------------------------------------------
+   -- Description: 0x03 Read Multiple Holding Registers
+   -- Parameters:
+   --   - Start          : Start Address
+   --   - Quantity       : Quantity of registers to read
+   --   - Exception_Code : Exception code, if all is ok, set it to
+   --                      MB_Protocol.E_OK
+   --   - Buffer         : Buffer to store the values of the holding registers
+   ---------------------------------------------------------------------------
    procedure F0x03 (Start      : MB_Types.Address;
                     Quantity   : MB_Types.Quantity;
                     Exception_Code : out MB_Types.Byte;
@@ -69,17 +83,21 @@ package body Modbus_Slave is
       end if;
 
       for I in Start + 1 .. Quantity loop
-         Buffer_HR (Integer (I)) := Buffer_HR (Integer (I)) + 1;
          Buffer (Index) := Buffer_HR (Integer (I));
          Index := Index + 1;
       end loop;
 
       Exception_Code := MB_Protocol.E_OK;
    end F0x03;
+   ---------------------------------------------------------------------------
    
+   ---------------------------------------------------------------------------
+   -- Call backs register
+   ---------------------------------------------------------------------------
    Cmd : aliased MB_Slave.Cmd_Type :=
      (Cmd_0x03_Read_Holding_Reg => F0x03'Access,
       Cmd_0x10_Write_Holding_Reg => null);
+   ---------------------------------------------------------------------------
    
    task body Modbus is
       ID_Modbus : constant MB_Types.Byte := 2;
@@ -87,17 +105,24 @@ package body Modbus_Slave is
    begin
       
       loop
+         -- wait for a valid message
          Length := MB_Ascii.Recv (My_MB_Ascii, Milliseconds (3000));
       
          if Length > 0 then
-         
+            
+            -- If a valid Modbus message is received, check ID
             if My_MB_Ascii.Buffer (MB_Transport.ID_Pos) = ID_Modbus then
             
+               -- Process message
                Length := MB_Slave.Process (My_MB_Ascii.Buffer, 
                                            MB_Transport.PDU_Pos, 
                                            Cmd'Access);
-            
-               MB_Ascii.Send (My_MB_Ascii, My_MB_Ascii.Buffer, Length+1);
+               
+               -- increase length for include ID
+               Length := Length+1;
+               
+               -- send response
+               MB_Ascii.Send (My_MB_Ascii, My_MB_Ascii.Buffer, Length);
             
             end if;
          end if;
