@@ -31,13 +31,20 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+-- This file implements an interface between Serial Call Backs required in
+-- Modbus and the Serial Port handled by POSIX.
+
 with Ada.Real_Time; use Ada.Real_Time;
 with Ada.Streams; use Ada.Streams;
 with GNAT.Serial_Communications; use GNAT.Serial_Communications;
 
 package body Serial is
+   Name : Port_Name := "/dev/pts/3";
    Port : Serial_Port;
    
+   ---------------------------------------------------------------------------
+   -- Recv Function
+   ---------------------------------------------------------------------------
    function Recv (Data : out Byte;
                   Timeout : in Ada.Real_Time.Time_Span) return Boolean is
       Start_Time : Ada.Real_Time.Time := Clock;
@@ -49,11 +56,13 @@ package body Serial is
          
          Read (Port, Buffer, Last);
 
+         -- if data has been received, store it in Data and return
          if Last >= Buffer'First then
             Data := Byte(Buffer(Buffer'First));
             return True;
          end if;
       
+         -- if no data has been received, check for timeout
          if Clock - Start_Time >= Timeout then
             return False;
          end if;
@@ -62,6 +71,9 @@ package body Serial is
       
    end Recv;
 
+   ---------------------------------------------------------------------------
+   -- Recv Procedure
+   ---------------------------------------------------------------------------
    procedure Send (Data : in Byte) is
       Buffer : Stream_Element_Array (1 .. 1);
    begin
@@ -71,7 +83,12 @@ package body Serial is
    
 begin 
   
-   Open (Port, "/dev/pts/2");
-   Set (Port => Port, Timeout => 0.05);
+   -- open serial port
+   Open (Port, Name);
+   
+   -- Set receive timeout to 0.05 seconds. Setting a value lower than this 
+   -- may cause POSIX to use a spinlock and consume CPU unnecessarily. 
+   -- In this case, we don't need a timeout less than 0.05 seconds.
+   Set (Port => Port, Timeout => 0.050);
    
 end Serial;
