@@ -1,4 +1,4 @@
-name: Ada (GNAT)
+name: CI
 
 on:
   push:
