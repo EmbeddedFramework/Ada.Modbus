@@ -59,6 +59,7 @@ package MB_Rtu is
       Serial_Length : MB_Serial_CB.Get_Length_CB := Length;
 
       -- private fields
+      Time_Byte : Time_Span;
       Time_Inter_Byte : Time_Span;
       Time_Out_Byte : Time_Span;
 

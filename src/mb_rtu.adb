@@ -153,15 +153,16 @@ package body MB_Rtu is
       Baud : Positive := Self.Serial_Baud.all;
       Length : Positive := Self.Serial_Length.all;
       Microsecond : constant := 0.000001;
-      Time_Byte : Time_Span := To_Time_Span(1.0 * Length / Baud);
    begin
+
+      Self.Time_Byte := To_Time_Span(1.0 * Length / Baud);
 
       if Baud > Limit_Baud then
          Self.Time_Inter_Byte := To_Time_Span(750 * Microsecond);
          Self.Time_Out_Byte := To_Time_Span(1750 * Microsecond);
       else
-         Self.Time_Inter_Byte := Time_Byte * 3 / 2;
-         Self.Time_Out_Byte := Time_Byte * 7 / 2;
+         Self.Time_Inter_Byte := Self.Time_Byte * 3 / 2;
+         Self.Time_Out_Byte := Self.Time_Byte * 7 / 2;
       end if;
 
    end Calc_Times;
