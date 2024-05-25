@@ -43,11 +43,30 @@ package body MB_Rtu is
 
    -- ID + FNC_COD + CRC
    Min_Msg_Length : constant Msg_Length := 1 + 1 + 2;
-
+   Limit_Baud     : constant Positive := 19200;
 
    -- =========================================================================
    -- Public procedures and functions
    -- =========================================================================
+
+   procedure Calc_Times (Self : in out MB_Rtu_Type) is
+      Baud : Positive := Self.Serial_Baud.all;
+      Length : Positive := Self.Serial_Length.all;
+      Microsecond : constant := 0.000001;
+      Time_Byte : Time_Span := To_Time_Span(1.0 * Length / Baud);
+   begin
+
+      if Baud > Limit_Baud then
+         Self.Time_Inter_Byte := To_Time_Span(750 * Microsecond);
+         Self.Time_Out_Byte := To_Time_Span(1750 * Microsecond);
+      else
+         Self.Time_Inter_Byte := Time_Byte * 3 / 2;
+         Self.Time_Out_Byte := Time_Byte * 7 / 2;
+      end if;
+
+   end Calc_Times;
+
+
    overriding
    procedure Send (Self : in out MB_Rtu_Type ;
                    Buffer :  Byte_Array ;

@@ -48,10 +48,10 @@ package MB_Rtu is
    --   - Baud   : Call back for get Serial Port Baudrate
    --   - Length : Call back for get total bits length on the the Serial Port
    ---------------------------------------------------------------------------
-   type MB_Rtu_Type(Recv   : MB_Serial_CB.Recv_CB;
-                    Send   : MB_Serial_CB.Send_CB;
-                    Baud   : MB_Serial_CB.Get_Baud_CB;
-                    Length : MB_Serial_CB.Get_Length_CB) is
+   type MB_Rtu_Type(Recv   : not null MB_Serial_CB.Recv_CB;
+                    Send   : not null MB_Serial_CB.Send_CB;
+                    Baud   : not null MB_Serial_CB.Get_Baud_CB;
+                    Length : not null MB_Serial_CB.Get_Length_CB) is
      new MB_Transport.MB_Transport_Type (Msg_Max_Length) with record
       Serial_Recv : MB_Serial_CB.Recv_CB := Recv;
       Serial_Send : MB_Serial_CB.Send_CB := Send;
@@ -63,6 +63,8 @@ package MB_Rtu is
       Time_Out_Byte : Time_Span;
 
    end record;
+
+   procedure Calc_Times (Self : in out MB_Rtu_Type);
 
    ---------------------------------------------------------------------------
    -- Description: Sends the specified buffer (binary) over the Modbus RTU
