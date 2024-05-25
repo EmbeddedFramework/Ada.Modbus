@@ -31,31 +31,39 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with Ada.Real_Time;
+with MB_Transport;
+with Ada.Real_Time; use Ada.Real_Time;
+with Interfaces; use Interfaces;
+with Ada.Characters.Handling; use Ada.Characters.Handling;
 with MB_Types; use MB_Types;
 
-package MB_Serial_CB is
+package body MB_Rtu is
 
-   ---------------------------------------------------------------------------
-   -- Description: Receive data from the serial port
-   -- Parameters:
-   --   - Data   : Data received
-   --   - Timeout: Maximum time to wait for a data.
-   -- Return: True if data has been received.
-   ---------------------------------------------------------------------------
-   type Recv_CB is access function (Data : out Byte ;
-                                    Timeout : in Ada.Real_Time.Time_Span)
-                                    return Boolean;
+   subtype Msg_Length is Integer range 0 .. MB_Rtu.Msg_Max_Length;
 
-   ---------------------------------------------------------------------------
-   -- Description: Send data to the serial port
-   -- Parameters:
-   --   - Data   : Data to be sent
-   ---------------------------------------------------------------------------
-   type Send_CB is access procedure (Data : in Byte);
+   -- ID + FNC_COD + CRC
+   Min_Msg_Length : constant Msg_Length := 1 + 1 + 2;
 
-   type Get_Baud_CB is access function return Positive;
 
-   type Get_Length_CB is access function return Positive;
+   -- =========================================================================
+   -- Public procedures and functions
+   -- =========================================================================
+   overriding
+   procedure Send (Self : in out MB_Rtu_Type ;
+                   Buffer :  Byte_Array ;
+                   Length : MB_Transport.Msg_Length) is
 
-end MB_Serial_CB;
+   begin
+
+      null;
+
+   end Send;
+
+   overriding
+   function Recv (Self :  in out MB_Rtu_Type ;
+                  Timeout : Time_Span) return MB_Transport.Msg_Length is
+   begin
+      return 0;
+   end Recv;
+
+end MB_Rtu;
