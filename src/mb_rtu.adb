@@ -216,54 +216,62 @@ package body MB_Rtu is
                   Timeout : Time_Span) return MB_Transport.Msg_Length is
 
       Begin_Time : Time := Clock;
-      Start_Time : Time;
+      Start_Time : Time := Clock;
       Elapsed_Time : Time_Span;
       Total_Time : Time_Span;
       Index : Msg_Length := 0;
       Byte_Rec : Byte;
       Start_Rec : Boolean := False;
-      Ret : Boolean;
+      Ret : Boolean := False;
 
    begin
 
       Reception_Loop:
       loop
 
-         Start_Time := Clock;
+         if Ret then
+            Start_Time := Clock;
+         end if;
+
          Ret := Self.Serial_Recv (Byte_Rec,
                                   Self.Time_Byte + Self.Time_Out_Byte);
 
          Elapsed_Time := Clock - Start_Time;
          Total_Time := Clock - Begin_Time;
 
-         if Elapsed_Time > Self.Time_Byte + Self.Time_Out_Byte then
-
-            if Start_Rec and Index >= Min_Msg_Length then
-               if Check_CRC (Self.Buffer, Index) then
-                  exit Reception_Loop;
-               else
-                  Index := 0;
-                  Start_Rec := False;
-               end if;
-            end if;
+         if Elapsed_Time >= Self.Time_Byte + Self.Time_Out_Byte then
 
             if Total_Time > Timeout then
                Index := 0;
                exit Reception_Loop;
             end if;
 
-            Start_Rec := True;
-            Index := 0;
-         end if;
-
-         if Elapsed_Time < Self.Time_Byte + Self.Time_Inter_Byte then
             if Ret then
-               Index := Index + 1;
+               Start_Rec := True;
+               Index := 1;
                Self.Buffer (Index) := Byte_Rec;
             end if;
+
+            if Start_Rec and Index >= Min_Msg_Length then
+               if Check_CRC (Self.Buffer, Index) then
+                  Index := Index - 2;
+                  exit Reception_Loop;
+               else
+                  Index := 0;
+                  Start_Rec := False;
+               end if;
+            end if;
          else
-            Start_Rec := False;
-            Index := 0;
+            if Elapsed_Time < Self.Time_Byte + Self.Time_Inter_Byte then
+               if Ret then
+                  Index := Index + 1;
+                  Self.Buffer (Index) := Byte_Rec;
+               end if;
+            else
+               Start_Rec := False;
+               Index := 0;
+            end if;
+
          end if;
 
       end loop Reception_Loop;
