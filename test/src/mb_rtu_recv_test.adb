@@ -56,17 +56,33 @@ package body Mb_Rtu_Recv_Test is
       return AUnit.Format ("Test Modbus RTU Recv");
    end Name;
 
-   Buffer : constant MB_Types.Byte_Array :=
+   type Time_Span_Array is array (Positive range <>) of Time_Span;
+
+   Buffer_1 : aliased MB_Types.Byte_Array :=
      (1 => 16#11#, 2 => 16#22#, 3 => 16#33#, 4 => 16#44#,
       5 => 16#AA#, 6 => 16#BB#, 7 => 16#1A#, 8 => 16#E2#,
       9 => 16#AD#, 10 => 16#D1#);
 
-   type Time_Span_Array is array (Positive range <>) of Time_Span;
-
-   Times_1 : constant Time_Span_Array :=
+   Times_1 : aliased Time_Span_Array :=
      (Time_Byte + Time_Out_Byte,
       Time_Byte, Time_Byte, Time_Byte, Time_Byte, Time_Byte, Time_Byte,
       Time_Byte, Time_Byte, Time_Byte);
+
+   Buffer_2 : aliased MB_Types.Byte_Array :=
+     (1 => 16#11#, 2 => 16#22#, 3 => 16#33#, 4 => 16#44#,
+      5 => 16#AA#, 6 => 16#BB#, 7 => 16#1A#, 8 => 16#E2#,
+      9 => 16#AD#, 10 => 16#D1#);
+
+   Times_2 : aliased Time_Span_Array :=
+     (Time_Byte + Time_Out_Byte,
+      Time_Byte, Time_Byte, Time_Byte, Time_Byte, Time_Byte, Time_Byte,
+      Time_Byte + Time_Out_Byte, Time_Byte, Time_Byte);
+
+   type Byte_Array_Ptr is access all MB_Types.Byte_Array;
+   Ptr_Buf : Byte_Array_Ptr;
+
+   type Times_Array_Ptr is access all Time_Span_Array;
+   Ptr_Tim : Times_Array_Ptr;
 
    Buffer_Exp : constant MB_Types.Byte_Array :=
      (1 => 16#11#, 2 => 16#22#, 3 => 16#33#, 4 => 16#44#,
@@ -82,9 +98,9 @@ package body Mb_Rtu_Recv_Test is
    function SRecv (Data : out Byte; Timeout : in Time_Span) return Boolean is
    begin
 
-      if Recv_Count <= Times_1'Length then
-         delay until Clock + Times_1 (Recv_Count);
-         Data := Buffer (Recv_Count);
+      if Recv_Count <= Ptr_Buf'Length then
+         delay until Clock + Ptr_Tim (Recv_Count);
+         Data := Ptr_Buf (Recv_Count);
          Recv_Count := Recv_Count + 1;
          return True;
       end if;
@@ -116,6 +132,11 @@ package body Mb_Rtu_Recv_Test is
 
       MB_Rtu.Calc_Times (My_MB_Rtu);
 
+      --  Test for Buffer 1
+      Ptr_Buf := Buffer_1'Access;
+      Ptr_Tim := Times_1'Access;
+      Recv_Count := 1;
+
       Ret := MB_Rtu.Recv (My_MB_Rtu, Milliseconds (100));
 
       Assert (Ret = Buffer_Exp'Length,
@@ -125,6 +146,16 @@ package body Mb_Rtu_Recv_Test is
          Assert (My_MB_Rtu.Buffer (I) = Buffer_Exp (I),
                  "Incorrect data sent at" & I'Image);
       end loop;
+
+      --  Test for Buffer 2
+      Ptr_Buf := Buffer_2'Access;
+      Ptr_Tim := Times_2'Access;
+      Recv_Count := 1;
+
+      Ret := MB_Rtu.Recv (My_MB_Rtu, Milliseconds (100));
+
+      Assert (Ret = 0,
+              "Incorrect total bytes sent");
 
    end Run_Test;
 
