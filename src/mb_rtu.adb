@@ -144,6 +144,24 @@ package body MB_Rtu is
       return CRC_Type (CrcMsb) * 256 + CRC_Type (CrcLsb);
    end Calc_CRC;
 
+   function Check_CRC (Buffer : Byte_Array; Length : MB_Transport.Msg_Length)
+                       return Boolean is
+      Crc : CRC_Type;
+      Crc_H : Byte;
+      Crc_L : Byte;
+   begin
+
+      Crc := Calc_CRC (Buffer, Length-2);
+      Crc_L := Byte (Crc and 16#FF#);
+      Crc_H := Byte (Crc / 256);
+
+      if Crc_L = Buffer (Length - 1) and Crc_H = Buffer (Length) then
+         return True;
+      end if;
+
+      return False;
+
+   end Check_CRC;
 
    -- =========================================================================
    -- Public procedures and functions
@@ -196,8 +214,62 @@ package body MB_Rtu is
    overriding
    function Recv (Self :  in out MB_Rtu_Type ;
                   Timeout : Time_Span) return MB_Transport.Msg_Length is
+
+      Begin_Time : Time := Clock;
+      Start_Time : Time;
+      Elapsed_Time : Time_Span;
+      Total_Time : Time_Span;
+      Index : Msg_Length := 0;
+      Byte_Rec : Byte;
+      Start_Rec : Boolean := False;
+      Ret : Boolean;
+
    begin
-      return 0;
+
+      Reception_Loop:
+      loop
+
+         Start_Time := Clock;
+         Ret := Self.Serial_Recv (Byte_Rec,
+                                  Self.Time_Byte + Self.Time_Out_Byte);
+
+         Elapsed_Time := Clock - Start_Time;
+         Total_Time := Clock - Begin_Time;
+
+         if Elapsed_Time > Self.Time_Byte + Self.Time_Out_Byte then
+
+            if Start_Rec and Index >= Min_Msg_Length then
+               if Check_CRC (Self.Buffer, Index) then
+                  exit Reception_Loop;
+               else
+                  Index := 0;
+                  Start_Rec := False;
+               end if;
+            end if;
+
+            if Total_Time > Timeout then
+               Index := 0;
+               exit Reception_Loop;
+            end if;
+
+            Start_Rec := True;
+            Index := 0;
+         end if;
+
+         if Elapsed_Time < Self.Time_Byte + Self.Time_Inter_Byte then
+            if Ret then
+               Index := Index + 1;
+               Self.Buffer (Index) := Byte_Rec;
+            end if;
+         else
+            Start_Rec := False;
+            Index := 0;
+         end if;
+
+      end loop Reception_Loop;
+
+      return Index;
+
    end Recv;
 
 end MB_Rtu;
