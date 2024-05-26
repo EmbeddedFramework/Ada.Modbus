@@ -215,13 +215,12 @@ package body MB_Rtu is
    function Recv (Self :  in out MB_Rtu_Type ;
                   Timeout : Time_Span) return MB_Transport.Msg_Length is
 
-      Begin_Time : Time := Clock;
+      Begin_Time : constant Time := Clock;
       Start_Time : Time := Clock;
       Elapsed_Time : Time_Span;
       Total_Time : Time_Span;
       Index : Msg_Length := 0;
       Byte_Rec : Byte;
-      Start_Rec : Boolean := False;
       Ret : Boolean := False;
 
    begin
@@ -247,29 +246,28 @@ package body MB_Rtu is
             end if;
 
             if Ret then
-               Start_Rec := True;
                Index := 1;
                Self.Buffer (Index) := Byte_Rec;
             end if;
 
-            if Start_Rec and Index >= Min_Msg_Length then
+            if Index >= Min_Msg_Length then
                if Check_CRC (Self.Buffer, Index) then
                   Index := Index - 2;
                   exit Reception_Loop;
                else
                   Index := 0;
-                  Start_Rec := False;
                end if;
             end if;
          else
-            if Elapsed_Time < Self.Time_Byte + Self.Time_Inter_Byte then
-               if Ret then
-                  Index := Index + 1;
-                  Self.Buffer (Index) := Byte_Rec;
+            if Index > 0 then
+               if Elapsed_Time < Self.Time_Byte + Self.Time_Inter_Byte then
+                  if Ret then
+                     Index := Index + 1;
+                     Self.Buffer (Index) := Byte_Rec;
+                  end if;
+               else
+                  Index := 0;
                end if;
-            else
-               Start_Rec := False;
-               Index := 0;
             end if;
 
          end if;
