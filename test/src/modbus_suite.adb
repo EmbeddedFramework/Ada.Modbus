@@ -35,6 +35,8 @@
 with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
 with Mb_Ascii_Send_Test;
 with Mb_Ascii_Recv_Test;
+with Mb_Rtu_Send_Test;
+with Mb_Rtu_Recv_Test;
 with Mb_Slave_F0x03_Test;
 with Mb_Slave_F0x03_Test_2;
 with Mb_Slave_F0x10_Test;
@@ -46,6 +48,8 @@ package body Modbus_Suite is
    begin
       Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
       Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Recv_Test.Test));
+      Ret.Add_Test (Test_Case_Access'(new Mb_Rtu_Send_Test.Test));
+      Ret.Add_Test (Test_Case_Access'(new Mb_Rtu_Recv_Test.Test));
       Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test.Test));
       Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test_2.Test));
       Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x10_Test.Test));

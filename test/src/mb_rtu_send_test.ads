@@ -1,5 +1,6 @@
 ------------------------------------------------------------------------------
 -- Copyright 2024, Gustavo Muro
+-- Copyright (C) 2008, AdaCore
 -- All rights reserved
 --
 -- This file is part of EmbeddedFirmware.
@@ -31,32 +32,23 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with Ada.Real_Time;
+with AUnit;
+with AUnit.Simple_Test_Cases;
 with MB_Types; use MB_Types;
+with Ada.Real_Time; use Ada.Real_Time;
 
+package Mb_Rtu_Send_Test is
 
-package MB_Serial_CB is
+   type Test is new AUnit.Simple_Test_Cases.Test_Case with null record;
 
-   ---------------------------------------------------------------------------
-   -- Description: Receive data from the serial port
-   -- Parameters:
-   --   - Data   : Data received
-   --   - Timeout: Maximum time to wait for a data.
-   -- Return: True if data has been received.
-   ---------------------------------------------------------------------------
-   type Recv_CB is access function (Data : out Byte ;
-                                    Timeout : in Ada.Real_Time.Time_Span)
-                                    return Boolean;
+   function Name (T : Test) return AUnit.Message_String;
 
-   ---------------------------------------------------------------------------
-   -- Description: Send data to the serial port
-   -- Parameters:
-   --   - Data   : Data to be sent
-   ---------------------------------------------------------------------------
-   type Send_CB is access procedure (Data : in Byte);
+   procedure Run_Test (T : in out Test);
 
-   type Get_Baud_CB is access function return Positive;
+private
+   procedure SSend (Data : in Byte);
+   function SRecv (Data : out Byte; Timeout : in Time_Span) return Boolean;
+   function Get_Baud_CB return Positive;
+   function Get_Length_CB return Positive;
 
-   type Get_Length_CB is access function return Positive;
-
-end MB_Serial_CB;
+end Mb_Rtu_Send_Test;
