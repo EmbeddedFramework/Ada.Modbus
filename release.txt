@@ -1,0 +1,14 @@
+
+Release notes for Ada_Modbus
+----------------------------
+
+0.2.0	27/05/2024
+	Added Modbus RTU
+
+0.1.0	23/05/2024
+	First release. It includes:
+	- Modbus Slave
+	- Modbus ASCII
+	- Unit Test
+
+
