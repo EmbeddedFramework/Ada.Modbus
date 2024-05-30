@@ -37,10 +37,10 @@ with Ada.Real_Time; use Ada.Real_Time;
 
 package MB_Master is
 
-   type MB_Master_Type(Transport : MB_Transport.MB_Transport_Access;
-                       Retries   : Positive) is tagged record
-      Tran : MB_Transport.MB_Transport_Access := Transport;
-      Rtrs : Positive := Retries;
+   type MB_Master_Type is tagged record
+      Transport    : MB_Transport.MB_Transport_Access;
+      Retries    : Positive;
+      Timeout : Time_Span;
    end record;
 
    procedure Read_Hold_Reg(Self     : in out MB_Master_Type;

@@ -34,8 +34,8 @@
 with MB_Transport;
 with Ada.Real_Time; use Ada.Real_Time;
 with Interfaces; use Interfaces;
-with MB_Types; use MB_Types;
-
+with MB_Types;
+with MB_Protocol; use MB_Protocol;
 package body MB_Master is
 
    procedure Read_Hold_Reg(Self     : in out MB_Master_Type;
@@ -48,11 +48,36 @@ package body MB_Master is
       -- Create an alias for the buffer byte. We are going to use the
       -- Byte_Array of the given transport
       Buffer_Byte : MB_Types.Byte_Array renames Self.Transport.all.Buffer;
-
+      Retry_Cnt : Natural := Self.Retries;
+      Length : MB_Transport.Msg_Length;
    begin
 
+      loop
 
-      MB_Transport.Send (Self.Transport.all, Buffer_Byte, 5);
+         Length := MB_Transport.ID_Pos;
+         Buffer_Byte (Length) := Id;
+
+         Length := MB_Transport.PDU_Pos;
+         Buffer_Byte (Length) := FCN_READ_HOLDING_REGISTERS;
+
+         MB_Types.Write_Word (Address, Buffer_Byte, Length+1);
+         Length := Length + 2;
+
+         MB_Types.Write_Word (Quantity, Buffer_Byte, Length+1);
+         Length := Length + 2;
+
+         MB_Transport.Send (Self.Transport.all, Buffer_Byte, Length);
+
+         Length := MB_Transport.Recv (Self.Transport.all, Self.Timeout);
+
+         if Length = 0 then
+            Retry_Cnt := Retry_Cnt - 1;
+         end if;
+
+         exit when Retry_Cnt <= 0;
+
+
+      end loop;
 
    end Read_Hold_Reg;
 
