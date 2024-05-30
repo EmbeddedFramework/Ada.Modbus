@@ -56,6 +56,8 @@ package MB_Transport is
       Buffer : MB_Types.Byte_Array (1 .. Buffer_Size);
    end record;
 
+   type MB_Transport_Access is access all MB_Transport_Type'Class;
+
    procedure Send (Self : in out MB_Transport_Type ;
                    Buffer : MB_Types.Byte_Array ;
                    Length : MB_Transport.Msg_Length) is abstract;
