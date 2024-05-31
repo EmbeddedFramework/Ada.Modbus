@@ -52,6 +52,13 @@ package MB_Protocol is
    E_WRONG_REG_QTY                 : constant := 16#03#;
    E_FNC_ERROR                     : constant := 16#04#;
    
+   -- Other error codes
+   E_SLAVE_NO_RESPONSE             : constant := 16#10#;
+   E_INCORRECT_RESPONSE            : constant := 16#11#;
+   
    ERROR_FLAG                      : constant := 16#80#;
+   
+   F0x03_Max_Qty : constant := 125;
+   F0x10_Max_Qty : constant := 123;
    
 end MB_Protocol;
