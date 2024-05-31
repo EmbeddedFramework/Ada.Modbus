@@ -157,4 +157,70 @@ package body MB_Master is
    end Read_Hold_Reg;
 
 
+   function Write_Mult_Reg(Self     : in out MB_Master_Type;
+                           Buffer   : in MB_Types.Holding_Register_Array;
+                           Address  : in MB_Types.Address;
+                           Quantity : in MB_Types.Quantity;
+                           Id : in MB_Types.Byte) return Error_Code_Type is
+
+      -- Create an alias for the buffer byte. We are going to use the
+      -- Byte_Array of the given transport
+      Buffer_Byte : MB_Types.Byte_Array renames Self.Transport.all.Buffer;
+      Retry_Cnt : Natural := Self.Retries;
+      Length : MB_Transport.Msg_Length;
+      E_C    : Error_Code_Type;
+   begin
+
+      if Quantity < 1 or Quantity > F0x10_Max_Qty then
+         return E_WRONG_REG_QTY;
+      end if;
+
+      loop
+         exit when Retry_Cnt <= 0;
+
+         -- Set ID
+         Length := ID_Pos;
+         Buffer_Byte (Length) := Id;
+
+         -- Set Function Code
+         Length := PDU_Pos;
+         Buffer_Byte (Length) := FCN_WRITE_MULTIPLE_REGISTERS;
+
+         -- Set Register address
+         MB_Types.Write_Word (Address, Buffer_Byte, Length+1);
+         Length := Length + 2;
+
+         -- Set quantity of registers
+         MB_Types.Write_Word (Quantity, Buffer_Byte, Length+1);
+         Length := Length + 2;
+
+         -- Byte count
+         Length := Length + 1;
+         Buffer_Byte (Length) := MB_Types.Byte (Quantity * 2);
+
+         -- Registers Value
+         MB_Types.Write_Multiples_Words (Buffer, 1, Quantity, Buffer_Byte,
+                                        Length + 1);
+
+         Length := Length + MB_Transport.Msg_Length (Quantity * 2);
+
+         -- Send the message to the slave
+         Send (Self.Transport.all, Buffer_Byte, Length);
+
+         -- Receive the message from the slave
+         Length := Recv (Self.Transport.all, Self.Timeout);
+
+         Retry_Cnt := Retry_Cnt - 1;
+
+
+
+
+
+      end loop;
+
+      return E_C;
+
+   end Write_Mult_Reg;
+
+
 end MB_Master;

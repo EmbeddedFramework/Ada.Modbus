@@ -71,7 +71,8 @@ package MB_Master is
                                    return Error_Code_Type;
 
    ---------------------------------------------------------------------------
-   -- Description: Execute the function "Read Holding Register" on a Slave
+   -- Description: Execute the function "Read Holding Register" (0x03)
+   --              on a Slave
    -- Parameters:
    --   - Self     : Modbus Master Object
    --   - Buffer   : Buffer to store the values read from the holding registers
@@ -85,5 +86,22 @@ package MB_Master is
                           Address  : in MB_Types.Address;
                           Quantity : in MB_Types.Quantity;
                           Id       : in MB_Types.Byte) return Error_Code_Type;
+
+   ---------------------------------------------------------------------------
+   -- Description: Execute the function "Write Multiple Register" (0x10)
+   --              on a Slave
+   -- Parameters:
+   --   - Self     : Modbus Master Object
+   --   - Buffer   : Buffer to store the values read from the holding registers
+   --   - Address  : Address to stard reading
+   --   - Quantity : Number of holding register to read
+   --   - Id       : Slave Id
+   --   Return : Error code
+   ---------------------------------------------------------------------------
+   function Write_Mult_Reg(Self     : in out MB_Master_Type;
+                           Buffer   : in MB_Types.Holding_Register_Array;
+                           Address  : in MB_Types.Address;
+                           Quantity : in MB_Types.Quantity;
+                           Id       : in MB_Types.Byte) return Error_Code_Type;
 
 end MB_Master;
