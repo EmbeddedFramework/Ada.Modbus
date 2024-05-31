@@ -37,16 +37,28 @@ with Ada.Real_Time; use Ada.Real_Time;
 
 package MB_Master is
 
+   type Error_Code_Type is (E_OK,
+                            E_FNC_NOT_SUPPORTED,
+                            E_WRONG_STR_ADDR,
+                            E_WRONG_REG_QTY,
+                            E_FNC_ERROR,
+                            E_SLAVE_NO_RESPONSE,
+                            E_INCORRECT_RESPONSE);
+
    type MB_Master_Type is tagged record
       Transport    : MB_Transport.MB_Transport_Access;
       Retries    : Positive;
       Timeout : Time_Span;
    end record;
 
-   procedure Read_Hold_Reg(Self     : in out MB_Master_Type;
-                           Buffer   : out MB_Types.Holding_Register_Array;
-                           Address  : in MB_Types.Address;
-                           Quantity : in MB_Types.Quantity;
-                           Id       : in MB_Types.Byte);
+   function Error_Code_Value (E_C : Error_Code_Type) return MB_Types.Byte;
+   function Error_Code_From_Value (Value : MB_Types.Byte)
+                                   return Error_Code_Type;
+
+   function Read_Hold_Reg(Self     : in out MB_Master_Type;
+                          Buffer   : out MB_Types.Holding_Register_Array;
+                          Address  : in MB_Types.Address;
+                          Quantity : in MB_Types.Quantity;
+                          Id       : in MB_Types.Byte) return Error_Code_Type;
 
 end MB_Master;
