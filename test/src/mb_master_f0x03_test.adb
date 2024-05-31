@@ -50,14 +50,26 @@ package body Mb_Master_F0x03_Test is
       4 => 16#12#, 5 => 16#34#,
       6 => 16#56#, 7 => 16#78#);
 
+   Buffer_Send : MB_Types.Byte_Array (1 .. MB_Transport.ID_PDU_Length);
+   Buffer_Send_Length : MB_Transport.Msg_Length := 0;
+
+   Buffer_Send_Exp : constant MB_Types.Byte_Array :=
+     (1 => 16#01#, 2 => 16#03#,
+      3 => 16#00#, 4 => 16#00#,
+      5 => 16#00#, 6 => 16#02#);
+
    Buffer_HR : MB_Types.Holding_Register_Array (1 .. 2);
 
    overriding
    procedure Send (Self : in out My_MB_Transport_Type;
                    Buffer : MB_Types.Byte_Array;
                    Length : MB_Transport.Msg_Length) is
+      pragma Unused (Self);
    begin
-      null;
+      for I in 1 .. Length loop
+         Buffer_Send (I) := Buffer (I);
+      end loop;
+      Buffer_Send_Length := Length;
    end Send;
 
    overriding
@@ -89,8 +101,16 @@ package body Mb_Master_F0x03_Test is
 
       Assert (EC = MB_Master.E_OK, "Incorrect EC" & EC'Image);
 
-      Assert (Buffer_HR (1) = 16#1234#, "Incorrect HR" & Buffer_HR (1)'Image);
-      Assert (Buffer_HR (2) = 16#5678#, "Incorrect HR" & Buffer_HR (1)'Image);
+      Assert (Buffer_HR (1) = 16#1234#, "Incorrect HR0" & Buffer_HR (1)'Image);
+      Assert (Buffer_HR (2) = 16#5678#, "Incorrect HR1" & Buffer_HR (1)'Image);
+
+      Assert (Buffer_Send_Length = Buffer_Send_Exp'Length,
+              "Incorrect Buffer_Send_Length" & Buffer_Send_Length'Image);
+
+      for I in 1 .. Buffer_Send_Length loop
+         Assert (Buffer_Send (I) = Buffer_Send_Exp (I),
+                 "Incorrect Buffer_Send at" & I'Image);
+      end loop;
 
    end Run_Test;
 
