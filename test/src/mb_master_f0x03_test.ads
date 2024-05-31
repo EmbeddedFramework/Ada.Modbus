@@ -32,30 +32,33 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
-with Mb_Ascii_Send_Test;
-with Mb_Ascii_Recv_Test;
-with Mb_Rtu_Send_Test;
-with Mb_Rtu_Recv_Test;
-with Mb_Slave_F0x03_Test;
-with Mb_Slave_F0x03_Test_2;
-with Mb_Slave_F0x10_Test;
-with Mb_Master_F0x03_Test;
+with AUnit;
+with AUnit.Simple_Test_Cases;
+with MB_Types;
+with MB_Transport;
+with Ada.Real_Time; use Ada.Real_Time;
 
-package body Modbus_Suite is
+package Mb_Master_F0x03_Test is
 
-   function Suite return Access_Test_Suite is
-      Ret : constant Access_Test_Suite := new Test_Suite;
-   begin
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Recv_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Rtu_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Rtu_Recv_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test_2.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x10_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Master_F0x03_Test.Test));
-      return Ret;
-   end Suite;
+   type Test is new AUnit.Simple_Test_Cases.Test_Case with null record;
 
-end Modbus_Suite;
+   function Name (T : Test) return AUnit.Message_String;
+
+   procedure Run_Test (T : in out Test);
+
+private
+
+   type My_MB_Transport_Type is new
+     MB_Transport.MB_Transport_Type (256) with record
+      null;
+   end record;
+
+   procedure Send (Self : in out My_MB_Transport_Type;
+                   Buffer : MB_Types.Byte_Array;
+                   Length : MB_Transport.Msg_Length);
+
+   overriding
+   function Recv (Self : in out My_MB_Transport_Type;
+                  Timeout : Time_Span) return MB_Transport.Msg_Length;
+
+end Mb_Master_F0x03_Test;

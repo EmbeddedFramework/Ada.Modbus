@@ -32,30 +32,66 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
-with AUnit.Simple_Test_Cases; use AUnit.Simple_Test_Cases;
-with Mb_Ascii_Send_Test;
-with Mb_Ascii_Recv_Test;
-with Mb_Rtu_Send_Test;
-with Mb_Rtu_Recv_Test;
-with Mb_Slave_F0x03_Test;
-with Mb_Slave_F0x03_Test_2;
-with Mb_Slave_F0x10_Test;
-with Mb_Master_F0x03_Test;
+with AUnit.Assertions; use AUnit.Assertions;
+with MB_Master;
+use MB_Master;
+with Interfaces; use Interfaces;
 
-package body Modbus_Suite is
+package body Mb_Master_F0x03_Test is
 
-   function Suite return Access_Test_Suite is
-      Ret : constant Access_Test_Suite := new Test_Suite;
+   function Name (T : Test) return AUnit.Message_String is
+      pragma Unreferenced (T);
    begin
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Ascii_Recv_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Rtu_Send_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Rtu_Recv_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test_2.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x10_Test.Test));
-      Ret.Add_Test (Test_Case_Access'(new Mb_Master_F0x03_Test.Test));
-      return Ret;
-   end Suite;
+      return AUnit.Format ("Test Modbus Master F0x03");
+   end Name;
 
-end Modbus_Suite;
+   Buffer_Recv : constant MB_Types.Byte_Array :=
+     (1 => 16#01#, 2 => 16#03#, 3 => 16#04#,
+      4 => 16#12#, 5 => 16#34#,
+      6 => 16#56#, 7 => 16#78#);
+
+   Buffer_HR : MB_Types.Holding_Register_Array (1 .. 2);
+
+   overriding
+   procedure Send (Self : in out My_MB_Transport_Type;
+                   Buffer : MB_Types.Byte_Array;
+                   Length : MB_Transport.Msg_Length) is
+   begin
+      null;
+   end Send;
+
+   overriding
+   function Recv (Self : in out My_MB_Transport_Type;
+                  Timeout : Time_Span) return MB_Transport.Msg_Length is
+
+   begin
+      for I in 1 .. Buffer_Recv'Length loop
+         Self.Buffer (I) := Buffer_Recv (I);
+      end loop;
+
+      return Buffer_Recv'Length;
+   end Recv;
+
+   My_MB_Transport : aliased My_MB_Transport_Type;
+
+   My_MB_Master : MB_Master.MB_Master_Type :=
+     (Transport => My_MB_Transport'Access,
+     Retries => 5,
+     Timeout => Milliseconds (100));
+
+   EC : MB_Master.Error_Code_Type;
+
+   procedure Run_Test (T : in out Test) is
+      pragma Unreferenced (T);
+   begin
+
+      EC := MB_Master.Read_Hold_Reg (My_MB_Master, Buffer_HR, 0, 2, 1);
+
+      Assert (EC = MB_Master.E_OK, "Incorrect EC" & EC'Image);
+
+      Assert (Buffer_HR (1) = 16#1234#, "Incorrect HR" & Buffer_HR (1)'Image);
+      Assert (Buffer_HR (2) = 16#5678#, "Incorrect HR" & Buffer_HR (1)'Image);
+
+   end Run_Test;
+
+end Mb_Master_F0x03_Test;
