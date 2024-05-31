@@ -32,6 +32,8 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+--  Check for correct communication
+
 with AUnit.Assertions; use AUnit.Assertions;
 with MB_Master;
 use MB_Master;
@@ -45,21 +47,27 @@ package body Mb_Master_F0x03_Test is
       return AUnit.Format ("Test Modbus Master F0x03");
    end Name;
 
+   --  Buffer for the Recv method
    Buffer_Recv : constant MB_Types.Byte_Array :=
      (1 => 16#01#, 2 => 16#03#, 3 => 16#04#,
       4 => 16#12#, 5 => 16#34#,
       6 => 16#56#, 7 => 16#78#);
 
+   --  Buffer and length for storing the sent message
    Buffer_Send : MB_Types.Byte_Array (1 .. MB_Transport.ID_PDU_Length);
    Buffer_Send_Length : MB_Transport.Msg_Length := 0;
 
+   --  Expected values for the Send method
    Buffer_Send_Exp : constant MB_Types.Byte_Array :=
      (1 => 16#01#, 2 => 16#03#,
       3 => 16#00#, 4 => 16#00#,
       5 => 16#00#, 6 => 16#02#);
 
+   --  Holding registers
    Buffer_HR : MB_Types.Holding_Register_Array (1 .. 2);
 
+   ---------------------------------------------------------------------------
+   --  Send method (overriding from Modbus Transport)
    overriding
    procedure Send (Self : in out My_MB_Transport_Type;
                    Buffer : MB_Types.Byte_Array;
@@ -72,10 +80,11 @@ package body Mb_Master_F0x03_Test is
       Buffer_Send_Length := Length;
    end Send;
 
+   ---------------------------------------------------------------------------
+   --  Recv method (overriding from Modbus Transport)
    overriding
    function Recv (Self : in out My_MB_Transport_Type;
                   Timeout : Time_Span) return MB_Transport.Msg_Length is
-
    begin
       for I in 1 .. Buffer_Recv'Length loop
          Self.Buffer (I) := Buffer_Recv (I);
@@ -84,6 +93,8 @@ package body Mb_Master_F0x03_Test is
       return Buffer_Recv'Length;
    end Recv;
 
+   ---------------------------------------------------------------------------
+   --  Objects
    My_MB_Transport : aliased My_MB_Transport_Type;
 
    My_MB_Master : MB_Master.MB_Master_Type :=
@@ -91,10 +102,9 @@ package body Mb_Master_F0x03_Test is
      Retries => 5,
      Timeout => Milliseconds (100));
 
-   EC : MB_Master.Error_Code_Type;
-
    procedure Run_Test (T : in out Test) is
       pragma Unreferenced (T);
+      EC : MB_Master.Error_Code_Type;
    begin
 
       EC := MB_Master.Read_Hold_Reg (My_MB_Master, Buffer_HR, 0, 2, 1);
