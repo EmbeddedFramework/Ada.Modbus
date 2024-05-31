@@ -88,47 +88,60 @@ package body MB_Master is
       end if;
 
       loop
-
          exit when Retry_Cnt <= 0;
 
+         -- Set ID
          Length := ID_Pos;
          Buffer_Byte (Length) := Id;
 
+         -- Set Function Code
          Length := PDU_Pos;
          Buffer_Byte (Length) := FCN_READ_HOLDING_REGISTERS;
 
+         -- Set Register address
          MB_Types.Write_Word (Address, Buffer_Byte, Length+1);
          Length := Length + 2;
 
+         -- Set quantity of registers
          MB_Types.Write_Word (Quantity, Buffer_Byte, Length+1);
          Length := Length + 2;
 
+         -- Send the message to the slave
          Send (Self.Transport.all, Buffer_Byte, Length);
 
+         -- Receive the message from the slave
          Length := Recv (Self.Transport.all, Self.Timeout);
 
          Retry_Cnt := Retry_Cnt - 1;
+
+         -- If the slave didn't send a response, set Error Code
          if Length = 0 then
             E_C := E_SLAVE_NO_RESPONSE;
 
+         -- If the ID doesn't match, set Error Code
          elsif Buffer_Byte (ID_Pos) /= Id then
             E_C := E_INCORRECT_RESPONSE;
 
+         -- If the Function doesn't match, set Error Code
          elsif Buffer_Byte (PDU_Pos) /= FCN_READ_HOLDING_REGISTERS then
             E_C := E_INCORRECT_RESPONSE;
 
+         -- If the slave sent an error code, assign it to E_C
          elsif Buffer_Byte (PDU_Pos) =
               (FCN_READ_HOLDING_REGISTERS or MB_Protocol.ERROR_FLAG) then
             E_C := Error_Code_From_Value (Buffer_Byte (PDU_Pos + 1 ));
             Retry_Cnt := 0;
 
+         -- If the total byte doesn't match, set Error Code
          elsif Integer (Buffer_Byte (PDU_Pos + 1)) /=
                Integer ((Quantity * 2)) then
             E_C := E_INCORRECT_RESPONSE;
 
+         -- If the message length doesn't match, set Error Code
          elsif Length /= MB_Transport.Msg_Length ((1 + 1 + 1 + Quantity*2)) then
             E_C := E_INCORRECT_RESPONSE;
 
+         -- If everything fine, copy the received data to the holding registers
          else
             MB_Types.Read_Multiples_Words (Buffer, 1, Quantity, Buffer_Byte,
                                            PDU_Pos + 2);

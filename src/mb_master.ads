@@ -37,6 +37,8 @@ with Ada.Real_Time; use Ada.Real_Time;
 
 package MB_Master is
 
+   -- The next error code enumeration is based on error codes from the Modbus
+   -- protocol, and extends it with master errors
    type Error_Code_Type is (E_OK,
                             E_FNC_NOT_SUPPORTED,
                             E_WRONG_STR_ADDR,
@@ -51,10 +53,33 @@ package MB_Master is
       Timeout : Time_Span;
    end record;
 
+   ---------------------------------------------------------------------------
+   -- Description: Get the value of an error code
+   -- Parameters:
+   --   - E_C : Error code
+   --   Return : Error code value
+   ---------------------------------------------------------------------------
    function Error_Code_Value (E_C : Error_Code_Type) return MB_Types.Byte;
+
+   ---------------------------------------------------------------------------
+   -- Description: Get Error code from the given value
+   -- Parameters:
+   --   - Value : Error value
+   --   Return : Error code
+   ---------------------------------------------------------------------------
    function Error_Code_From_Value (Value : MB_Types.Byte)
                                    return Error_Code_Type;
 
+   ---------------------------------------------------------------------------
+   -- Description: Execute the function "Read Holding Register" on a Slave
+   -- Parameters:
+   --   - Self     : Modbus Master Object
+   --   - Buffer   : Buffer to store the values read from the holding registers
+   --   - Address  : Address to stard reading
+   --   - Quantity : Number of holding register to read
+   --   - Id       : Slave Id
+   --   Return : Error code
+   ---------------------------------------------------------------------------
    function Read_Hold_Reg(Self     : in out MB_Master_Type;
                           Buffer   : out MB_Types.Holding_Register_Array;
                           Address  : in MB_Types.Address;
