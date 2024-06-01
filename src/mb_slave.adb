@@ -38,9 +38,6 @@ with MB_Types; use MB_Types;
 
 package body MB_Slave is
 
-   F0x03_Max_Qty : constant := 125;
-   F0x10_Max_Qty : constant := 123;
-
    function process (Buffer : in out Byte_Array;
                      Start_PDU : MB_Transport.Msg_Length;
                      Cmd : Cmd_Type_Ptr)
@@ -62,10 +59,11 @@ package body MB_Slave is
                   Addr : Address  := Read_Word (Buffer, Start_PDU + 1);
                   Qty  : Quantity := Read_Word (Buffer, Start_PDU + 3);
                   Buffer_HR :
-                  Holding_Register_Array (1 .. F0x03_Max_Qty) := (others => 0);
+                  Holding_Register_Array (1 .. MB_Protocol.F0x03_Max_Qty)
+                    := (others => 0);
                begin
 
-                  if Qty > F0x03_Max_Qty or Qty < 1 then
+                  if Qty > MB_Protocol.F0x03_Max_Qty or Qty < 1 then
                      Exception_Code := MB_Protocol.E_WRONG_REG_QTY;
                   else
                      Cmd.Cmd_0x03_Read_Holding_Reg (Addr, Qty, Exception_Code,
@@ -97,10 +95,12 @@ package body MB_Slave is
                   Qty  : Quantity := Read_Word (Buffer, Start_PDU + 3);
                   BC   : Byte     := Buffer (Start_PDU + 5);
                   Buffer_HR :
-                  Holding_Register_Array (1 .. F0x10_Max_Qty) := (others => 0);
+                  Holding_Register_Array (1 .. MB_Protocol.F0x10_Max_Qty)
+                    := (others => 0);
                begin
 
-                  if Qty > F0x10_Max_Qty or Qty < 1 or Qty * 2 /= Quantity (BC) then
+                  if Qty > MB_Protocol.F0x10_Max_Qty or
+                     Qty < 1 or Qty * 2 /= Quantity (BC) then
                      Exception_Code := MB_Protocol.E_WRONG_REG_QTY;
                   else
                      -- registers values

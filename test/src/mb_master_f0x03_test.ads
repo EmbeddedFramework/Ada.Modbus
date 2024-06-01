@@ -1,23 +1,24 @@
 ------------------------------------------------------------------------------
 -- Copyright 2024, Gustavo Muro
+-- Copyright (C) 2008, AdaCore
 -- All rights reserved
--- 
+--
 -- This file is part of EmbeddedFirmware.
--- 
+--
 -- Redistribution and use in source and binary forms, with or without
 -- modification, are permitted provided that the following conditions are met:
--- 
+--
 -- 1. Redistributions of source code must retain the above copyright notice,
 --    this list of conditions and the following disclaimer.
 --
 -- 2. Redistributions in binary form must reproduce the above copyright notice,
 --    this list of conditions and the following disclaimer in the documentation
 --    and/or other materials provided with the distribution.
--- 
+--
 -- 3. Neither the name of the copyright holder nor the names of its
 --    contributors may be used to endorse or promote products derived from this
 --    software without specific prior written permission.
--- 
+--
 -- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 -- AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 -- IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,34 +32,33 @@
 -- POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------
 
+with AUnit;
+with AUnit.Simple_Test_Cases;
 with MB_Types;
+with MB_Transport;
+with Ada.Real_Time; use Ada.Real_Time;
 
-package MB_Protocol is
-   
-   -- Modbus Functions definitions
-   FCN_READ_COILS                  : constant := 16#01#;
-   FCN_READ_DISCRETE_INPUTS        : constant := 16#02#;
-   FCN_READ_HOLDING_REGISTERS      : constant := 16#03#;
-   FCN_READ_INPUT_REGISTERS        : constant := 16#04#;
-   FCN_WRITE_SINGLE_COIL           : constant := 16#05#;
-   FCN_WRITE_SINGLE_REGISTER       : constant := 16#06#;
-   FCN_WRITE_MULTIPLE_COILS        : constant := 16#0F#;
-   FCN_WRITE_MULTIPLE_REGISTERS    : constant := 16#10#;
+package Mb_Master_F0x03_Test is
 
-   -- Modbus Error Codes
-   E_OK                            : constant := 16#00#;
-   E_FNC_NOT_SUPPORTED             : constant := 16#01#;
-   E_WRONG_STR_ADDR                : constant := 16#02#;
-   E_WRONG_REG_QTY                 : constant := 16#03#;
-   E_FNC_ERROR                     : constant := 16#04#;
-   
-   -- Other error codes
-   E_SLAVE_NO_RESPONSE             : constant := 16#10#;
-   E_INCORRECT_RESPONSE            : constant := 16#11#;
-   
-   ERROR_FLAG                      : constant := 16#80#;
-   
-   F0x03_Max_Qty : constant := 125;
-   F0x10_Max_Qty : constant := 123;
-   
-end MB_Protocol;
+   type Test is new AUnit.Simple_Test_Cases.Test_Case with null record;
+
+   function Name (T : Test) return AUnit.Message_String;
+
+   procedure Run_Test (T : in out Test);
+
+private
+
+   type My_MB_Transport_Type is new
+     MB_Transport.MB_Transport_Type (256) with record
+      null;
+   end record;
+
+   procedure Send (Self : in out My_MB_Transport_Type;
+                   Buffer : MB_Types.Byte_Array;
+                   Length : MB_Transport.Msg_Length);
+
+   overriding
+   function Recv (Self : in out My_MB_Transport_Type;
+                  Timeout : Time_Span) return MB_Transport.Msg_Length;
+
+end Mb_Master_F0x03_Test;

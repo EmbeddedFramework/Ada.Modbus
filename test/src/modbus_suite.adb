@@ -40,6 +40,8 @@ with Mb_Rtu_Recv_Test;
 with Mb_Slave_F0x03_Test;
 with Mb_Slave_F0x03_Test_2;
 with Mb_Slave_F0x10_Test;
+with Mb_Master_F0x03_Test;
+with Mb_Master_F0x10_Test;
 
 package body Modbus_Suite is
 
@@ -53,6 +55,8 @@ package body Modbus_Suite is
       Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test.Test));
       Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x03_Test_2.Test));
       Ret.Add_Test (Test_Case_Access'(new Mb_Slave_F0x10_Test.Test));
+      Ret.Add_Test (Test_Case_Access'(new Mb_Master_F0x03_Test.Test));
+      Ret.Add_Test (Test_Case_Access'(new Mb_Master_F0x10_Test.Test));
       return Ret;
    end Suite;
 
