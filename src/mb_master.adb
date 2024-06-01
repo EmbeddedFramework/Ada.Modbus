@@ -167,8 +167,10 @@ package body MB_Master is
       -- Byte_Array of the given transport
       Buffer_Byte : MB_Types.Byte_Array renames Self.Transport.all.Buffer;
       Retry_Cnt : Natural := Self.Retries;
-      Length : MB_Transport.Msg_Length;
-      E_C    : Error_Code_Type;
+      Length    : MB_Transport.Msg_Length;
+      E_C       : Error_Code_Type;
+      Addr_Rec  : MB_Types.Address;
+      Qty_Rec   : MB_Types.Quantity;
    begin
 
       if Quantity < 1 or Quantity > F0x10_Max_Qty then
@@ -212,9 +214,42 @@ package body MB_Master is
 
          Retry_Cnt := Retry_Cnt - 1;
 
+         -- If the slave didn't send a response, set Error Code
+         if Length = 0 then
+            E_C := E_SLAVE_NO_RESPONSE;
 
+         -- If the ID doesn't match, set Error Code
+         elsif Buffer_Byte (ID_Pos) /= Id then
+            E_C := E_INCORRECT_RESPONSE;
 
+         -- If the Function doesn't match, set Error Code
+         elsif Buffer_Byte (PDU_Pos) /= FCN_WRITE_MULTIPLE_REGISTERS then
+            E_C := E_INCORRECT_RESPONSE;
 
+         -- If the slave sent an error code, assign it to E_C
+         elsif Buffer_Byte (PDU_Pos) =
+              (FCN_WRITE_MULTIPLE_REGISTERS or MB_Protocol.ERROR_FLAG) then
+            E_C := Error_Code_From_Value (Buffer_Byte (PDU_Pos + 1 ));
+            Retry_Cnt := 0;
+
+         -- If the message length doesn't match, set Error Code
+         -- ID (1) + FC (1) + Address (2) + Quantity (2)
+         elsif Length /= 6 then
+            E_C := E_INCORRECT_RESPONSE;
+
+         -- Check for correct response (Quantity and Address)
+         else
+            Addr_Rec := MB_Types.Read_Word (Buffer_Byte, PDU_Pos + 1);
+            Qty_Rec  := MB_Types.Read_Word (Buffer_Byte, PDU_Pos + 3);
+
+            if Addr_Rec /= Address or Qty_Rec /= Quantity then
+               E_C := E_INCORRECT_RESPONSE;
+            else
+               E_C := E_OK;
+               Retry_Cnt := 0;
+            end if;
+
+         end if;
 
       end loop;
 
