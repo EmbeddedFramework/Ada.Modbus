@@ -47,10 +47,10 @@ package MB_Master is
                             E_SLAVE_NO_RESPONSE,
                             E_INCORRECT_RESPONSE);
 
-   type MB_Master_Type is tagged record
-      Transport    : MB_Transport.MB_Transport_Access;
-      Retries    : Positive;
-      Timeout : Time_Span;
+   type MB_Master_Type (Transport : not null MB_Transport.MB_Transport_Access)
+   is tagged record
+      Retries : Positive := 3;
+      Timeout : Time_Span := Milliseconds (100);
    end record;
 
    ---------------------------------------------------------------------------
