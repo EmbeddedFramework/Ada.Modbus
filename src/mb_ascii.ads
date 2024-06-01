@@ -54,11 +54,10 @@ package MB_Ascii is
    --   - Recv   : Call back for receive data
    --   - Send   : Call back for send data
    ---------------------------------------------------------------------------
-   type MB_Ascii_Type(Recv : MB_Serial_CB.Recv_CB;
-                      Send : MB_Serial_CB.Send_CB) is
+   type MB_Ascii_Type(Serial_Recv : MB_Serial_CB.Recv_CB;
+                      Serial_Send : MB_Serial_CB.Send_CB) is
      new MB_Transport.MB_Transport_Type (Msg_Max_Length) with record
-      Serial_Recv : MB_Serial_CB.Recv_CB := Recv;
-      Serial_Send : MB_Serial_CB.Send_CB := Send;
+      null;
    end record;
 
    ---------------------------------------------------------------------------
